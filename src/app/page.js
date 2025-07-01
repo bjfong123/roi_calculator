@@ -4,6 +4,7 @@ import CurrencyInput from 'react-currency-input-field';
 import Image from 'next/image';
 import { BarChart, XAxis, YAxis, Bar, Tooltip, Legend, ResponsiveContainer, Cell, Label, LineChart, CartesianGrid, Line} from "recharts";
 import { FaCheckCircle } from "react-icons/fa";
+import BeforeAfterSlider from './BeforeAfterSlider';
 
 export default function Home() {
   const [laborRate, setLaborRate] = useState(15);
@@ -56,7 +57,8 @@ const Annualdata = [
   return (  
   
     <main className="bg-gradient-to-br from-lime-400 via-lime-300 to-white-900 text-gray-900 min-h-screen py-10">
-      <div className="max-w-7xl mx-auto bg-white shadow-2xl rounded-xl overflow-hidden flex flex-col lg:flex-row">
+      <div className="max-w-lvh mx-auto bg-white shadow-2xl rounded-xl overflow-hidden">
+     <div className="max-w-lvh mx-auto bg-white rounded-xl overflow-hidden flex flex-col lg:flex-row">
        <div className="w-100 flex flex-auto">
         <div className="w-full lg: -1/2 p-10 bg-white">
           
@@ -66,22 +68,22 @@ const Annualdata = [
                     
             {/* Results */}
             <div className="bg-gray-100 p-4 rounded-lg mb-4">
-              <p className="text-lg text-gray-600 font-bold">Estimated Monthly Savings:</p>
-              <div className="text-3xl font-bold text-green-700"> ${monthlySavings.toFixed(2)}
+              <p className="text-3xl text-gray-600 font-bold">Estimated Monthly Savings:</p>
+              <div className="text-5xl font-bold text-green-700"> ${monthlySavings.toFixed(2)}
               </div>
             </div>
             <div className="bg-gray-100 p-4 rounded-lg mb-6">
-              <p className="text-lg text-gray-600 font-bold">Estimated Annual Savings:</p>
-              <div className="text-3xl font-bold text-green-700">${annualSavings.toFixed(2)}</div>
+              <p className="text-3xl text-gray-600 font-bold">Estimated Annual Savings:</p>
+              <div className="text-5xl font-bold text-green-700">${annualSavings.toFixed(2)}</div>
             </div>
             <div className="bg-gray-100 p-4 rounded-lg mb-6 font-bold">
-              <p className="text-lg text-gray-600 font-bold"> Estimated Time to Recoup Your Investment </p>
-              <div className="text-3xl font-bond text-green-700">6 months</div>
+              <p className="text-2xl text-gray-600 font-bold"> Estimated Time to Recoup Your Investment </p>
+              <div className="text-4xl font-bond text-green-700">6 months</div>
             </div>
             <div className="bg-gray-100 p-4 rounded-lg mb-6 font-bold" >
-              <p className="text-lg text-gray-600 font-bold"> Estimated 5-year Return on Investment </p>
-              <div className="text-3xl font-bond text-green-700"> 6 months</div>
-              <div className="text-3xl font-bond text-green-700 font-bold">Greater than 60%</div>
+              <p className="text-2xl text-gray-600 font-bold"> Estimated 5-year Return on Investment </p>
+              <div className="text-4xl font-bond text-green-700"> 6 months</div>
+              <div className="text-4xl font-bond text-green-700 font-bold">Greater than 60%</div>
             </div>
 
 
@@ -146,7 +148,7 @@ const Annualdata = [
           </div> 
           </div>
 
-      <div className="flex flex-auto w-100 justify-center items-start px-4 py-6"> 
+      <div className="flex flex-auto w-100 justify-center items-start px-4 py-6 hidden lg:block"> 
           <div className="flex flex-col items-center space-y-10">
           <div>
           {/*<Image className="" width={576} height={200} src="/image.jpg" alt="IMG"></Image> {/* img */}
@@ -189,53 +191,124 @@ const Annualdata = [
                      ))}
                 </Bar>
               </BarChart>
-              <div className="table-auto md:table-fixed">
-                <table className="table-auto">
-                  <thead>
-                    <tr>
-                      <th className="text-xl"> 3-year leasing plans </th>
-                      <th> Warranty </th>
-                      <th> 48-hour Swap Guarantee</th>
-                      <th> Software Installation Training </th>
-                      <th> Robot Installation (2000$) </th>
-                      <th> Marketing Launch Promotion </th>
-                      <th> Priority Customer / System-Business Integration</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr className="w-md mb-100">
-                      <td className="font-bold text-xl "> $799/month </td>
-                      <td> <div> </div> </td>
-                      <td> </td>
-                      <td> </td>
-                      <td> </td>
-                      <td> </td>
-                      <td> </td>
-                    </tr>
-                    <tr>
-                      <td className="font-bold text-xl py-3"> $899/month </td>
-                      <td></td>
-                      <td> </td>
-                      <td> <div className="flex justify-center"> <FaCheckCircle className="h-5 w-5" />  </div>  </td>
-                      <td> <div className="flex justify-center"> <FaCheckCircle className="h-5 w-5" />  </div> </td>
-                      <td></td>
-                      <td></td>
-                    </tr>
-                    <tr>
-                      <td className="font-bold text-xl"> $999/month </td>
-                      <td> <div className="flex justify-center"> <FaCheckCircle className="h-5 w-5" />  </div> </td>
-                      <td> <div className="flex justify-center"> <FaCheckCircle className="h-5 w-5" />  </div>  </td>
-                      <td> <div className="flex justify-center"> <FaCheckCircle className="h-5 w-5" /> </div> </td>
-                      <td> <div className="flex justify-center"> <FaCheckCircle className="h-5 w-5" /> </div> </td>
-                      <td> <div className="flex justify-center"> <FaCheckCircle className="h-5 w-5" /> </div> </td>
-                      <td> <div className="flex justify-center"> <FaCheckCircle className="h-5 w-5" /> </div> </td>
-                    </tr>
-                  </tbody>
-                </table>
-                <br></br>
-              </div>
+    <table className="table-fixed border-collapse border border-gray-300 w-full">
+    
+    <thead>
+  <tr className="bg-gray-100">
+    <th className="border border-gray-400 text-2xl text-left px-4 py-2">3-year lease payment options</th>
+    <th className="border border-gray-400 text-4xl text-center px-4 py-2">$799</th>
+    <th className="border border-gray-400 text-4xl text-center px-4 py-2">$899</th>
+    <th className="border border-gray-400 text-4xl text-center px-4 py-2">$999</th>
+  </tr>
+</thead>
+<tbody>
+  {[
+    ["Warranty", "", "", <FaCheckCircle className="text-green-600 inline-block size-9" />],
+    ["Void Setup Fee (-$2000)", "", <FaCheckCircle className="text-green-600 inline-block size-9" />, <FaCheckCircle className="text-green-600 inline-block size-9" />],
+    ["48-hour Swap Guarantee", "", "", <FaCheckCircle className="text-green-600 inline-block size-9" />],
+    ["Software Installation Training", "", <FaCheckCircle className="text-green-600 inline-block size-9" />, <FaCheckCircle className="text-green-600 inline-block size-9" />],
+    ["Marketing Launch Promotion", "", "", <FaCheckCircle className="text-green-600 inline-block size-9" />],
+    ["System-business Integration", "", "", <FaCheckCircle className="text-green-600 inline-block size-9" />],
+    ["Priority Customer", "", "", <FaCheckCircle className="text-green-600 inline-block size-9" />],
+  ].map((row, idx) => (
+    <tr key={idx}>
+      {row.map((cell, i) => (
+        <td
+          key={i}
+          className={`border border-gray-400 px-4 py-2 text-xl text-center ${i === 0 ? "text-left font-semibold" : ""}`}
+        >
+          {cell}
+        </td>
+      ))}
+    </tr>
+  ))}
+</tbody>
+</table>
+
+    {/* <thead> 
+    <tr className="bg-gray-100">
+      <th className="text-2xl text-left px-4 py-2">3-year lease payment options</th>
+      <th className="text-4xl text-center px-4 py-2">$799</th>
+      <th className="text-4xl text-center px-4 py-2">$899</th>
+      <th className="text-4xl text-center px-4 py-2">$999</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td className="text-3xl px-4 py-2 align-middle">Warranty</td>
+      <td className="align-middle"></td>
+      <td className="align-middle"></td>
+      <td className="text-center align-middle">
+        <FaCheckCircle className="text-green-600 inline-block size-9" />
+      </td>
+    </tr>
+    <tr>
+      <td className="text-3xl px-4 py-2 align-middle">Void Setup Fee (-$2000)</td>
+      <td className="align-middle"></td>
+      <td className="text-center align-middle">
+        <FaCheckCircle className="text-green-600 inline-block size-9" />
+      </td>
+      <td className="text-center align-middle">
+        <FaCheckCircle className="text-green-600 inline-block size-9" />
+      </td>
+    </tr>
+    <tr>
+      <td className="text-3xl px-4 py-2 align-middle">48-hour Swap Guarantee</td>
+      <td className="align-middle"></td>
+      <td className="align-middle"></td>
+      <td className="text-center align-middle">
+        <FaCheckCircle className="text-green-600 inline-block size-9" />
+      </td>
+    </tr>
+    <tr>
+      <td className="text-3xl px-4 py-2 align-middle">Software Installation Training</td>
+      <td className="align-middle"></td>
+      <td className="text-center align-middle">
+        <FaCheckCircle className="text-green-600 inline-block size-9" />
+      </td>
+      <td className="text-center align-middle">
+        <FaCheckCircle className="text-green-600 inline-block size-9" />
+      </td>
+    </tr>
+    <tr>
+      <td className="text-3xl px-4 py-2 align-middle">Marketing Launch Promotion</td>
+      <td className="align-middle"></td>
+      <td className="align-middle"></td>
+      <td className="text-center align-middle">
+        <FaCheckCircle className="text-green-600 inline-block size-9" />
+      </td>
+    </tr>
+    <tr>
+      <td className="text-3xl px-4 py-2 align-middle">System-business Integration</td>
+      <td className="align-middle"></td>
+      <td className="align-middle"></td>
+      <td className="text-center align-middle">
+        <FaCheckCircle className="text-green-600 inline-block size-9" />
+      </td>
+    </tr>
+    <tr>
+      <td className="text-3xl px-4 py-2 align-middle">Priority Customer</td>
+      <td className="align-middle"></td>
+      <td className="align-middle"></td>
+      <td className="text-center align-middle">
+        <FaCheckCircle className="text-green-600 inline-block size-9" />
+      </td>
+    </tr>
+  </tbody> 
+</table> */}
+
+
             </div>
         </div>          
+      </div>
+      <div className="mt-16">
+        <BeforeAfterSlider
+          beforeImage="/Gemini_Generated_Image_2i0gaq2i0gaq2i0g.jpg" // Replace with your actual image paths
+          afterImage="/IMG_1715.jpg"   // Replace with your actual image paths
+          beforeAlt="Tennis court before cleaning"
+          afterAlt="Tennis court after automated cleaning"
+        />
+      </div>
       </div>
     </main>
   );
