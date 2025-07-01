@@ -302,9 +302,9 @@ const Annualdata = [
         </div>          
       </div>
       <div className="mt-16">
-        <BeforeAfterSlider
+        <BeforeAfterSlider 
           beforeImage="/Gemini_Generated_Image_2i0gaq2i0gaq2i0g.jpg" // Replace with your actual image paths
-          afterImage="/IMG_1715.jpg"   // Replace with your actual image paths
+          afterImage="/CECE.jpg"   // Replace with your actual image paths
           beforeAlt="Tennis court before cleaning"
           afterAlt="Tennis court after automated cleaning"
         />
