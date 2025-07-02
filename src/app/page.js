@@ -19,6 +19,7 @@ export default function Home() {
 
 const colors = ['#FF6384','#F9da5b','#82ca9d'];
 
+{/* hi */}
 const data = [
   { name: 'Current Costs', value: 4 * laborRate * personnel * hours * courts * frequency},
   { name: 'CECE Costs', value: robotCost + installationFee},
