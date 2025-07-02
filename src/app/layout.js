@@ -1,5 +1,6 @@
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import ParallaxBackground from './ParallaxBackground';
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -19,9 +20,40 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-      >
+      <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
+        <ParallaxBackground/>
+        <div
+            id="parallax"
+            className="absolute inset-0 w-full min-h-full pointer-events-none"
+            style={{ height: '100%' }}
+          >
+            <div
+              className="layer absolute inset-0 w-full min-h-full"
+              data-depth="0.6"
+              style={{ height: '100%' }}
+            >
+              <div className="some-space absolute inset-0 w-full min-h-full" style={{ height: '100%' }}></div>
+            </div>
+            <div
+              className="layer absolute inset-0 w-full min-h-full"
+              data-depth="0.4"
+              style={{ height: '100%' }}
+            >
+              <div
+                id="particles-js"
+                className="absolute inset-0 w-full min-h-full opacity-100"
+                style={{ height: '100%' }}
+              ></div>
+            </div>
+            <div
+              className="layer absolute inset-0 w-full min-h-full"
+              data-depth="0.3"
+              style={{ height: '100%' }}
+            >
+              <div className="some-more-space absolute inset-0 w-full min-h-full" style={{ height: '100%' }}></div>
+            </div>
+          </div>
+
         {children}
       </body>
     </html>
