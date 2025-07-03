@@ -25,7 +25,7 @@ export default function Home() {
   const [frequency, setFrequency] = useState(2);
   const [courts, setCourts] = useState(15);
   const [robotCost, setRobotCost] = useState(799);
-  const [installationFee, setInstallationFee] = useState(0); // Added installation fee state
+  const [installationFee, setInstallationFee] = useState(0); // Added installation fee state test if worked
   const [monthlySavings, setMonthlySavings] = useState(0);
   const [annualSavings, setAnnualSavings] = useState(0);
 
