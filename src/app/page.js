@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import CurrencyInput from "react-currency-input-field";
 import Image from "next/image";
 import {
@@ -16,8 +16,9 @@ import {
   CartesianGrid,
   Line,
 } from "recharts";
-import { FaCheckCircle } from "react-icons/fa";
+import { FaCheckCircle, FaChevronDown, FaChevronUp } from "react-icons/fa";
 import BeforeAfterSlider from "./BeforeAfterSlider";
+
 export default function Home() {
   const [laborRate, setLaborRate] = useState(15);
   const [personnel, setPersonnel] = useState(1);
@@ -25,15 +26,51 @@ export default function Home() {
   const [frequency, setFrequency] = useState(2);
   const [courts, setCourts] = useState(15);
   const [robotCost, setRobotCost] = useState(799);
-  const [installationFee, setInstallationFee] = useState(0); // Added installation fee state test if worked
+  const [installationFee, setInstallationFee] = useState(0);
   const [monthlySavings, setMonthlySavings] = useState(0);
   const [annualSavings, setAnnualSavings] = useState(0);
+  const [activeDropdown, setActiveDropdown] = useState(null);
 
   const colors = ["#FF6384", "#F9da5b", "#82ca9d"];
 
-  {
-    /* hi */
-  }
+  // Plan features data
+  const planFeatures = {
+    799: [
+      { name: "Basic Plan", included: true },
+      { name: "Standard Support", included: true },
+    ],
+    899: [
+      { name: "Void Setup Fee (-$2000)", included: true },
+      { name: "Software Installation Training", included: true },
+      { name: "Enhanced Support", included: true },
+    ],
+    999: [
+      { name: "Warranty", included: true },
+      { name: "Void Setup Fee (-$2000)", included: true },
+      { name: "48-hour Swap Guarantee", included: true },
+      { name: "Software Installation Training", included: true },
+      { name: "Marketing Launch Promotion", included: true },
+      { name: "System-business Integration", included: true },
+      { name: "Priority Customer", included: true },
+    ],
+  };
+
+  // Auto-calculate ROI whenever any input changes
+  useEffect(() => {
+    const calculateROI = () => {
+      const weeklyCost = laborRate * personnel * hours * courts * frequency;
+      const monthlyCost = weeklyCost * 4;
+      const totalRobotCost = robotCost;
+      const savings = monthlyCost - totalRobotCost;
+
+      setMonthlySavings(savings - installationFee);
+      setAnnualSavings(savings * 12 - installationFee);
+    };
+
+    calculateROI();
+  }, [laborRate, personnel, hours, frequency, courts, robotCost, installationFee]);
+
+  // Calculate data for charts (updates automatically)
   const data = [
     {
       name: "Current Costs",
@@ -52,20 +89,8 @@ export default function Home() {
     { name: "Savings", value: annualSavings },
   ];
 
-  const calculateROI = () => {
-    const weeklyCost = laborRate * personnel * hours * courts * frequency;
-    const monthlyCost = weeklyCost * 4;
-    const totalRobotCost = robotCost; // Include installation fee in calculation
-    const savings = monthlyCost - totalRobotCost;
-
-    setMonthlySavings(savings - installationFee);
-    setAnnualSavings(savings * 12 - installationFee);
-  };
-
-  // Function to handle robot plan selection
   const handleRobotPlanChange = (cost) => {
     setRobotCost(cost);
-    // Set installation fee based on plan
     if (cost === 799) {
       setInstallationFee(1500);
     } else {
@@ -73,13 +98,21 @@ export default function Home() {
     }
   };
 
-  // to do: one time fee, animation and textbars for the sliders, none option
+  const toggleDropdown = (planCost) => {
+    setActiveDropdown(activeDropdown === planCost ? null : planCost);
+  };
 
   return (
     <>
-      <main className="bg-stone-800 text-gray-900 min-h-screen py-10">
-        <div className="max-w-lvh mx-auto bg-white shadow-2xl rounded-xl overflow-hidden">
-            <div className="flex items-center justify-center p-4 -py-5 text-5xl font-bold"> Operation ROI Calculator </div>
+      <main className="bg-stone-800 text-gray-900 min-h-screen py-4 px-2">
+        <div className="w-full max-w-none lg:max-w-[90vw] xl:max-w-[85vw] 2xl:max-w-7xl mx-auto bg-white shadow-2xl rounded-none lg:rounded-xl overflow-hidden">
+          
+          <div className="flex items-center justify-center p-6 lg:p-8">
+            <h1 className="text-4xl lg:text-5xl font-bold text-center leading-tight">
+              Operation ROI Calculator
+            </h1>
+          </div>
+          
           <div className="p-0 m-0">
             <BeforeAfterSlider
               hours={hours}
@@ -89,51 +122,43 @@ export default function Home() {
               afterAlt="Robot cleaning capacity visualization"
             />
           </div>
-          <div className="max-w-lvh mx-auto bg-white rounded-xl overflow-hidden flex flex-col lg:flex-row">
-            <div className="w-100 flex flex-auto">
-              <div className="w-full lg: -1/2 p-10 bg-white">
-                <h2 className="text-center text-3xl font-bold mb-6">
-                  {" "}
-                  Autopilot ROI Calculator{" "}
-                </h2>
-                <h1 className="text-3xl p-10 bg-lime-300 font-bold mb-4 text-center">
-                  See Your Potential ROI
-                </h1>
-                <p className="text-center text-black mb-8 text-2xl font-bold">
-                  Estimate your savings with automated court cleaning
+          
+          <div className="flex flex-col xl:flex-row gap-0 xl:gap-8 p-6 lg:p-8 xl:p-10">
+            
+            <div className="flex-1 xl:flex-none xl:w-1/2 bg-white rounded-lg shadow-lg p-8 lg:p-10 mb-6 xl:mb-0">
+              <h2 className="text-center text-3xl font-bold mb-6">
+                Autopilot ROI Calculator
+              </h2>
+              
+              <h1 className="text-3xl p-10 bg-lime-300 font-bold mb-4 text-center rounded-lg">
+                See Your Potential ROI
+              </h1>
+              
+              <p className="text-center text-black mb-8 text-2xl font-bold">
+                Estimate your savings with automated court cleaning
+              </p>
+
+              {/* Results - Now update automatically */}
+              <div className="bg-gray-100 p-6 rounded-lg mb-6">
+                <p className="text-3xl text-gray-600 font-bold mb-2">
+                  Estimated Monthly Savings:
                 </p>
-
-                {/* Results */}
-                <div className="bg-gray-100 p-4 rounded-lg mb-4">
-                  <p className="text-3xl text-gray-600 font-bold">
-                    Estimated Monthly Savings:
-                  </p>
-                  <div className="text-5xl font-bold text-green-700">
-                    {" "}
-                    ${monthlySavings.toFixed(2)}
-                  </div>
+                <div className="text-5xl font-bold text-green-700">
+                  ${monthlySavings.toFixed(2)}
                 </div>
-                <div className="bg-gray-100 p-4 rounded-lg mb-6">
-                  <p className="text-3xl text-gray-600 font-bold">
-                    Estimated Annual Savings:
-                  </p>
-                  <div className="text-5xl font-bold text-green-700">
-                    ${annualSavings.toFixed(2)}
-                  </div>
+              </div>
+              
+              <div className="bg-gray-100 p-6 rounded-lg mb-8">
+                <p className="text-3xl text-gray-600 font-bold mb-2">
+                  Estimated Annual Savings:
+                </p>
+                <div className="text-5xl font-bold text-green-700">
+                  ${annualSavings.toFixed(2)}
                 </div>
-                {/* comment
-            <div className="bg-gray-100 p-4 rounded-lg mb-6 font-bold">
-              <p className="text-2xl text-gray-600 font-bold"> Estimated Time to Recoup Your Investment </p>
-              <div className="text-4xl font-bond text-green-700">6 months</div>
-            </div>
-            <div className="bg-gray-100 p-4 rounded-lg mb-6 font-bold" >
-              <p className="text-2xl text-gray-600 font-bold"> Estimated 5-year Return on Investment </p>
-              <div className="text-4xl font-bond text-green-700"> 6 months</div>
-              <div className="text-4xl font-bond text-green-700 font-bold">Greater than 60%</div>
-            </div>
-            */}
+              </div>
 
-                {/* Sliders */}
+              {/* Sliders - Now trigger automatic updates */}
+              <div className="space-y-6">
                 <Slider
                   label="Fully burdened labor rate (hourly)"
                   min={10}
@@ -165,7 +190,6 @@ export default function Home() {
                   value={frequency}
                   setValue={setFrequency}
                 />
-                {/* <Button></Button> */}
                 <Slider
                   label="Number of courts"
                   min={1}
@@ -173,192 +197,215 @@ export default function Home() {
                   value={courts}
                   setValue={setCourts}
                 />
+              </div>
 
-                {/* Radio buttons for robot cost */}
-                <div className="mb-4">
-                  <label className="block font-semibold mb-1 text-2xl">
-                    {" "}
-                    Robot 3-year lease plan{" "}
-                  </label>
-                  <div className="flex space-x-4">
-                    <label className="inline-flex items-center text-xl">
-                      <input
-                        type="radio"
-                        name="robotCost"
-                        value={799}
-                        checked={robotCost === 799}
-                        onChange={() => handleRobotPlanChange(799)}
-                        className="form-radio"
-                      />
-                      <span className="ml-2"> $799 Plan </span>
-                    </label>
-                    <label className="inline-flex items-center">
-                      <input
-                        type="radio"
-                        name="robotCost"
-                        value={899}
-                        checked={robotCost === 899}
-                        onChange={() => handleRobotPlanChange(899)}
-                        className="form-radio"
-                      />
-                      <span className="ml-2 text-xl">$899 Plan</span>
-                    </label>
-                    <label className="inline-flex items-center">
-                      <input
-                        type="radio"
-                        name="robotCost"
-                        value={999}
-                        checked={robotCost === 999}
-                        onChange={() => handleRobotPlanChange(999)}
-                        className="form-radio"
-                      />
-                      <span className="ml-2 text-xl">$999 Plan</span>
-                    </label>
+              {/* Robot Plan Selection with Dropdowns */}
+              <div className="mb-8 mt-8">
+                <label className="block font-semibold mb-4 text-2xl">
+                  Robot 3-year lease plan
+                </label>
+                <div className="flex flex-col gap-4">
+                  
+                  {/* $799 Plan */}
+                  <div className="relative">
+                    <div 
+                      className={`border-2 rounded-lg p-4 cursor-pointer transition-all ${
+                        robotCost === 799 ? 'border-green-500 bg-green-50' : 'border-gray-300'
+                      }`}
+                      onClick={() => {
+                        handleRobotPlanChange(799);
+                        toggleDropdown(799);
+                      }}
+                    >
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center">
+                          <input
+                            type="radio"
+                            name="robotCost"
+                            value={799}
+                            checked={robotCost === 799}
+                            onChange={() => handleRobotPlanChange(799)}
+                            className="form-radio h-5 w-5 mr-3"
+                          />
+                          <span className="text-xl font-semibold">$799/Month Plan</span>
+                        </div>
+                        {activeDropdown === 799 ? <FaChevronUp /> : <FaChevronDown />}
+                      </div>
+                      
+                      {activeDropdown === 799 && (
+                        <div className="mt-4 pl-8 border-t pt-4">
+                          {planFeatures[799].map((feature, index) => (
+                            <div key={index} className="flex items-center mb-2">
+                              <span className="text-sm text-gray-600">• {feature.name}</span>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* $899 Plan */}
+                  <div className="relative">
+                    <div 
+                      className={`border-2 rounded-lg p-4 cursor-pointer transition-all ${
+                        robotCost === 899 ? 'border-purple-500 bg-purple-50' : 'border-gray-300'
+                      }`}
+                      onClick={() => {
+                        handleRobotPlanChange(899);
+                        toggleDropdown(899);
+                      }}
+                    >
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center">
+                          <input
+                            type="radio"
+                            name="robotCost"
+                            value={899}
+                            checked={robotCost === 899}
+                            onChange={() => handleRobotPlanChange(899)}
+                            className="form-radio h-5 w-5 mr-3"
+                          />
+                          <span className="text-xl font-semibold">$899/Month Plan</span>
+                        </div>
+                        {activeDropdown === 899 ? <FaChevronUp /> : <FaChevronDown />}
+                      </div>
+                      
+                      {activeDropdown === 899 && (
+                        <div className="mt-4 pl-8 border-t pt-4">
+                          {planFeatures[899].map((feature, index) => (
+                            <div key={index} className="flex items-center mb-2">
+                              <FaCheckCircle className="text-green-600 mr-2 w-4 h-4" />
+                              <span className="text-sm text-gray-600">{feature.name}</span>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* $999 Plan */}
+                  <div className="relative">
+                    <div 
+                      className={`border-2 rounded-lg p-4 cursor-pointer transition-all ${
+                        robotCost === 999 ? 'border-blue-500 bg-blue-50' : 'border-gray-300'
+                      }`}
+                      onClick={() => {
+                        handleRobotPlanChange(999);
+                        toggleDropdown(999);
+                      }}
+                    >
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center">
+                          <input
+                            type="radio"
+                            name="robotCost"
+                            value={999}
+                            checked={robotCost === 999}
+                            onChange={() => handleRobotPlanChange(999)}
+                            className="form-radio h-5 w-5 mr-3"
+                          />
+                          <span className="text-xl font-semibold">$999/Month Plan</span>
+                        </div>
+                        {activeDropdown === 999 ? <FaChevronUp /> : <FaChevronDown />}
+                      </div>
+                      
+                      {activeDropdown === 999 && (
+                        <div className="mt-4 pl-8 border-t pt-4">
+                          {planFeatures[999].map((feature, index) => (
+                            <div key={index} className="flex items-center mb-2">
+                              <FaCheckCircle className="text-green-600 mr-2 w-4 h-4" />
+                              <span className="text-sm text-gray-600">{feature.name}</span>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
                   </div>
                 </div>
-
-                {/* Button */}
-                <button
-                  onClick={calculateROI}
-                  className="w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-2 rounded-md transition"
-                >
-                  Calculate My ROI
-                </button>
               </div>
+
+              {/* Calculate button removed - everything updates automatically */}
             </div>
 
-            <div className="flex flex-auto w-100 justify-center items-start px-4 py-6 hidden lg:block">
+            <div className="flex-1 xl:flex-none xl:w-1/2 bg-white rounded-lg shadow-lg p-8 lg:p-10">
               <div className="flex flex-col items-center space-y-10">
-                <div>
-                  {/*<Image className="" width={576} height={200} src="/image.jpg" alt="IMG"></Image> {/* img */}
-                  <h3 className="text-center font-bold text-xl">
-                    {" "}
-                    Current Costs vs. CECE Costs and Savings (Monthly){" "}
+                
+                {/* Charts now update automatically */}
+                <div className="w-full">
+                  <h3 className="text-center font-bold text-xl mb-4">
+                    Current Costs vs. CECE Costs and Savings (Monthly)
                   </h3>
-                  <BarChart width={500} height={300} data={data}>
-                    <XAxis dataKey="name" />
-                    <YAxis>
-                      <Label
-                        value="USD ($)"
-                        angle={-90}
-                        position="insideLeft"
-                        offset={1}
-                        style={{ textAnchor: "middle" }}
-                      />
-                    </YAxis>
-                    <Tooltip />
-                    <Bar dataKey="value">
-                      {data.map((entry, index) => (
-                        <Cell
-                          key={`cell-${index}`}
-                          fill={colors[index % colors.length] || "#ccc"}
+                  <div className="w-full">
+                    <ResponsiveContainer width="100%" height={300}>
+                      <BarChart data={data}>
+                        <XAxis 
+                          dataKey="name" 
+                          fontSize={14}
+                          interval={0}
+                          angle={-45}
+                          textAnchor="end"
+                          height={80}
                         />
-                      ))}
-                    </Bar>
-                  </BarChart>
+                        <YAxis fontSize={14}>
+                          <Label
+                            value="USD ($)"
+                            angle={-90}
+                            position="insideLeft"
+                            offset={1}
+                            style={{ textAnchor: "middle" }}
+                          />
+                        </YAxis>
+                        <Tooltip />
+                        <Bar dataKey="value">
+                          {data.map((entry, index) => (
+                            <Cell
+                              key={`cell-${index}`}
+                              fill={colors[index % colors.length] || "#ccc"}
+                            />
+                          ))}
+                        </Bar>
+                      </BarChart>
+                    </ResponsiveContainer>
+                  </div>
                 </div>
-                <h3 className="text-center font-bold text-xl">
-                  {" "}
-                  Current Costs vs. CECE Costs and Savings (Annually){" "}
-                </h3>
-                <BarChart width={500} height={300} data={Annualdata}>
-                  <XAxis dataKey="name" />
-                  <YAxis>
-                    <Label
-                      value="USD ($)"
-                      angle={-90}
-                      position="insideLeft"
-                      offset={1}
-                      style={{ textAnchor: "middle" }}
-                    />
-                  </YAxis>
-                  <Tooltip />
-                  <Bar dataKey="value">
-                    {data.map((entry, index) => (
-                      <Cell
-                        key={`cell-${index}`}
-                        fill={colors[index % colors.length] || "#ccc"}
-                      />
-                    ))}
-                  </Bar>
-                </BarChart>
-                <table className="table-fixed border-collapse border border-gray-300 w-full">
-                  <thead>
-                    <tr className="bg-gray-100">
-                      <th className="border border-gray-400 text-2xl text-left px-4 py-2">
-                        3-year lease payment options
-                      </th>
-                      <th className="border border-gray-400 text-4xl text-center px-4 py-2">
-                        $799
-                      </th>
-                      <th className="border border-gray-400 text-4xl text-center px-4 py-2">
-                        $899
-                      </th>
-                      <th className="border border-gray-400 text-4xl text-center px-4 py-2">
-                        $999
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {[
-                      [
-                        "Warranty",
-                        "",
-                        "",
-                        <FaCheckCircle className="text-green-600 inline-block size-9" />,
-                      ],
-                      [
-                        "Void Setup Fee (-$2000)",
-                        "",
-                        <FaCheckCircle className="text-green-600 inline-block size-9" />,
-                        <FaCheckCircle className="text-green-600 inline-block size-9" />,
-                      ],
-                      [
-                        "48-hour Swap Guarantee",
-                        "",
-                        "",
-                        <FaCheckCircle className="text-green-600 inline-block size-9" />,
-                      ],
-                      [
-                        "Software Installation Training",
-                        "",
-                        <FaCheckCircle className="text-green-600 inline-block size-9" />,
-                        <FaCheckCircle className="text-green-600 inline-block size-9" />,
-                      ],
-                      [
-                        "Marketing Launch Promotion",
-                        "",
-                        "",
-                        <FaCheckCircle className="text-green-600 inline-block size-9" />,
-                      ],
-                      [
-                        "System-business Integration",
-                        "",
-                        "",
-                        <FaCheckCircle className="text-green-600 inline-block size-9" />,
-                      ],
-                      [
-                        "Priority Customer",
-                        "",
-                        "",
-                        <FaCheckCircle className="text-green-600 inline-block size-9" />,
-                      ],
-                    ].map((row, idx) => (
-                      <tr key={idx}>
-                        {row.map((cell, i) => (
-                          <td
-                            key={i}
-                            className={`border border-gray-400 px-4 py-2 text-xl text-center ${
-                              i === 0 ? "text-left font-semibold" : ""
-                            }`}
-                          >
-                            {cell}
-                          </td>
-                        ))}
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
+                
+                <div className="w-full">
+                  <h3 className="text-center font-bold text-xl mb-4">
+                    Current Costs vs. CECE Costs and Savings (Annually)
+                  </h3>
+                  <div className="w-full">
+                    <ResponsiveContainer width="100%" height={300}>
+                      <BarChart data={Annualdata}>
+                        <XAxis 
+                          dataKey="name" 
+                          fontSize={14}
+                          interval={0}
+                          angle={-45}
+                          textAnchor="end"
+                          height={80}
+                        />
+                        <YAxis fontSize={14}>
+                          <Label
+                            value="USD ($)"
+                            angle={-90}
+                            position="insideLeft"
+                            offset={1}
+                            style={{ textAnchor: "middle" }}
+                          />
+                        </YAxis>
+                        <Tooltip />
+                        <Bar dataKey="value">
+                          {data.map((entry, index) => (
+                            <Cell
+                              key={`cell-${index}`}
+                              fill={colors[index % colors.length] || "#ccc"}
+                            />
+                          ))}
+                        </Bar>
+                      </BarChart>
+                    </ResponsiveContainer>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -367,8 +414,6 @@ export default function Home() {
     </>
   );
 }
-
-// Reusable Slider Component
 
 function Slider({
   label,
@@ -381,8 +426,10 @@ function Slider({
   suffix = "",
 }) {
   return (
-    <div className="mb-4">
-      <label className="block font-semibold mb-1 text-2xl">{label}</label>
+    <div className="mb-6">
+      <label className="block font-semibold mb-3 text-2xl">
+        {label}
+      </label>
       <input
         type="range"
         min={min}
@@ -390,20 +437,20 @@ function Slider({
         step={step}
         value={value}
         onChange={(e) => setValue(parseFloat(e.target.value))}
-        className="w-full"
+        className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
       />
-      <div className="text-right text-sm font-mono">
-        {prefix}
-        {
-          <input
-            className=""
-            type="text"
-            style={{ font: "30px", width: "25px" }}
-            value={value}
-            onChange={(e) => setValue(parseFloat(e.target.value) || 0)}
-          />
-        }
-        {suffix}
+      <div className="text-right text-base font-mono mt-2">
+        <span className="text-gray-600">{prefix}</span>
+        <input
+          className="inline-block w-24 text-center border border-gray-300 rounded px-2 py-1 text-lg"
+          type="number"
+          value={value}
+          onChange={(e) => setValue(parseFloat(e.target.value) || 0)}
+          min={min}
+          max={max}
+          step={step}
+        />
+        <span className="text-gray-600">{suffix}</span>
       </div>
     </div>
   );

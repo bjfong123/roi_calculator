@@ -90,6 +90,9 @@ const BeforeAfterSlider = ({
       <h2 className="text-3xl font-bold text-center mb-8 text-gray-800">
         Cleaning Capacity Comparison
       </h2>
+      <h2 className="text-2xl font-bold text-center mb-5 text-gray-800">
+        Human to Robot Comparison
+      </h2>
       
       <div
         ref={containerRef}
