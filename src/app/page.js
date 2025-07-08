@@ -19,6 +19,13 @@ import {
 import { FaCheckCircle, FaChevronDown, FaChevronUp } from "react-icons/fa";
 import BeforeAfterSlider from "./BeforeAfterSlider";
 
+const formatCurrency = (value) =>
+  new Intl.NumberFormat("en-US", {
+    style: "currency",
+    currency: "USD",
+    minimumFractionDigits: 2,
+  }).format(value);
+
 export default function Home() {
   const [laborRate, setLaborRate] = useState(15);
   const [personnel, setPersonnel] = useState(1);
@@ -30,6 +37,8 @@ export default function Home() {
   const [monthlySavings, setMonthlySavings] = useState(0);
   const [annualSavings, setAnnualSavings] = useState(0);
   const [activeDropdown, setActiveDropdown] = useState(null);
+  const [currentMonthlyCost, setCurrentMonthlyCost] = useState(0);
+  const [currentAnnualCost, setCurrentAnnualCost] = useState(0);
 
   const colors = ["#FF6384", "#F9da5b", "#82ca9d"];
 
@@ -65,6 +74,8 @@ export default function Home() {
 
       setMonthlySavings(savings - installationFee);
       setAnnualSavings(savings * 12 - installationFee);
+      setCurrentMonthlyCost(monthlyCost);
+      setCurrentAnnualCost(monthlyCost*12);
     };
 
     calculateROI();
@@ -106,14 +117,13 @@ export default function Home() {
     <>
       <main className="bg-stone-800 text-gray-900 min-h-screen py-4 px-2">
         <div className="w-full max-w-none lg:max-w-[90vw] xl:max-w-[85vw] 2xl:max-w-7xl mx-auto bg-white shadow-2xl rounded-none lg:rounded-xl overflow-hidden">
-          
           <div className="flex items-center justify-center p-6 lg:p-8">
             <h1 className="text-4xl lg:text-5xl font-bold text-center leading-tight">
               Operation ROI Calculator
             </h1>
           </div>
           
-          <div className="p-0 m-0">
+          <div className="p-0 m-0 print:hidden">
             <BeforeAfterSlider
               hours={hours}
               frequency={frequency}
@@ -126,14 +136,7 @@ export default function Home() {
           <div className="flex flex-col xl:flex-row gap-0 xl:gap-8 p-6 lg:p-8 xl:p-10">
             
             <div className="flex-1 xl:flex-none xl:w-1/2 bg-white rounded-lg shadow-lg p-8 lg:p-10 mb-6 xl:mb-0">
-              <h2 className="text-center text-3xl font-bold mb-6">
-                Autopilot ROI Calculator
-              </h2>
-              
-              <h1 className="text-3xl p-10 bg-lime-300 font-bold mb-4 text-center rounded-lg">
-                See Your Potential ROI
-              </h1>
-              
+          
               <p className="text-center text-black mb-8 text-2xl font-bold">
                 Estimate your savings with automated court cleaning
               </p>
@@ -141,10 +144,28 @@ export default function Home() {
               {/* Results - Now update automatically */}
               <div className="bg-gray-100 p-6 rounded-lg mb-6">
                 <p className="text-3xl text-gray-600 font-bold mb-2">
+                  Current Monthly Costs:
+                </p>
+                <div className="text-5xl font-bold text-red-600">
+                  {formatCurrency(currentMonthlyCost)}
+                </div>
+              </div>
+
+              <div className="bg-gray-100 p-6 rounded-lg mb-8">
+                <p className="text-3xl text-gray-600 font-bold mb-2">
+                  Current Annual Costs:
+                </p>
+                <div className="text-5xl font-bold text-red-600">
+                  {formatCurrency(currentAnnualCost)}
+                </div>
+              </div>
+
+              <div className="bg-gray-100 p-6 rounded-lg mb-6">
+                <p className="text-3xl text-gray-600 font-bold mb-2">
                   Estimated Monthly Savings:
                 </p>
                 <div className="text-5xl font-bold text-green-700">
-                  ${monthlySavings.toFixed(2)}
+                  {formatCurrency(monthlySavings)}
                 </div>
               </div>
               
@@ -153,12 +174,12 @@ export default function Home() {
                   Estimated Annual Savings:
                 </p>
                 <div className="text-5xl font-bold text-green-700">
-                  ${annualSavings.toFixed(2)}
+                  {formatCurrency(annualSavings)}
                 </div>
               </div>
 
               {/* Sliders - Now trigger automatic updates */}
-              <div className="space-y-6">
+              <div className="space-y-6 print:hidden">
                 <Slider
                   label="Fully burdened labor rate (hourly)"
                   min={10}
@@ -199,7 +220,92 @@ export default function Home() {
                 />
               </div>
 
-              {/* Robot Plan Selection with Dropdowns */}
+              
+
+              {/* Calculate button removed - everything updates automatically */}
+            </div>
+
+            <div className="flex-1 xl:flex-none xl:w-1/2 bg-white rounded-lg shadow-lg p-8 lg:p-10">
+              <div className="flex flex-col items-center space-y-10">
+                
+                {/* Charts now update automatically */}
+                <div className="w-full">
+                  <h3 className="text-center font-bold text-xl mb-4">
+                    Current Costs vs. CECE Costs and Savings (Monthly)
+                  </h3>
+                  <div className="w-full">
+                    <ResponsiveContainer width="100%" height={300}>
+                      <BarChart data={data}>
+                        <XAxis 
+                          dataKey="name" 
+                          fontSize={14}
+                          interval={0}
+                          angle={-45}
+                          textAnchor="end"
+                          height={80}
+                        />
+                        <YAxis fontSize={14}>
+                          <Label
+                            value="USD ($)"
+                            angle={-90}
+                            position="insideLeft"
+                            offset={1}
+                            style={{ textAnchor: "middle" }}
+                          />
+                        </YAxis>
+                        <Tooltip />
+                        <Bar dataKey="value">
+                          {data.map((entry, index) => (
+                            <Cell
+                              key={`cell-${index}`}
+                              fill={colors[index % colors.length] || "#ccc"}
+                            />
+                          ))}
+                        </Bar>
+                      </BarChart>
+                    </ResponsiveContainer>
+                    
+                  </div>
+
+                </div>
+                
+                <div className="w-full">
+                  <h3 className="text-center font-bold text-xl mb-4">
+                    Current Costs vs. CECE Costs and Savings (Annually)
+                  </h3>
+                  <div className="w-full">
+                    <ResponsiveContainer width="100%" height={300}>
+                      <BarChart data={Annualdata}>
+                        <XAxis 
+                          dataKey="name" 
+                          fontSize={14}
+                          interval={0}
+                          angle={-45}
+                          textAnchor="end"
+                          height={80}
+                        />
+                        <YAxis fontSize={14}>
+                          <Label
+                            value="USD ($)"
+                            angle={-90}
+                            position="insideLeft"
+                            offset={1}
+                            style={{ textAnchor: "middle" }}
+                          />
+                        </YAxis>
+                        <Tooltip />
+                        <Bar dataKey="value">
+                          {data.map((entry, index) => (
+                            <Cell
+                              key={`cell-${index}`}
+                              fill={colors[index % colors.length] || "#ccc"}
+                            />
+                          ))}
+                        </Bar>
+                      </BarChart>
+                    </ResponsiveContainer>
+                  </div>
+                  {/* Robot Plan Selection with Dropdowns */}
               <div className="mb-8 mt-8">
                 <label className="block font-semibold mb-4 text-2xl">
                   Robot 3-year lease plan
@@ -321,90 +427,17 @@ export default function Home() {
                       )}
                     </div>
                   </div>
+                      <div className="flex justify-center align-center">
+                      <button
+                      onClick={() => window.print()}
+                      className="bg-green-900 text-white rounded-xl brightness-150 w-50 h-10 text-xl hover:bg-green-800 transition-all"
+                      >
+                        Print page
+
+                      </button>
+                      </div>
                 </div>
               </div>
-
-              {/* Calculate button removed - everything updates automatically */}
-            </div>
-
-            <div className="flex-1 xl:flex-none xl:w-1/2 bg-white rounded-lg shadow-lg p-8 lg:p-10">
-              <div className="flex flex-col items-center space-y-10">
-                
-                {/* Charts now update automatically */}
-                <div className="w-full">
-                  <h3 className="text-center font-bold text-xl mb-4">
-                    Current Costs vs. CECE Costs and Savings (Monthly)
-                  </h3>
-                  <div className="w-full">
-                    <ResponsiveContainer width="100%" height={300}>
-                      <BarChart data={data}>
-                        <XAxis 
-                          dataKey="name" 
-                          fontSize={14}
-                          interval={0}
-                          angle={-45}
-                          textAnchor="end"
-                          height={80}
-                        />
-                        <YAxis fontSize={14}>
-                          <Label
-                            value="USD ($)"
-                            angle={-90}
-                            position="insideLeft"
-                            offset={1}
-                            style={{ textAnchor: "middle" }}
-                          />
-                        </YAxis>
-                        <Tooltip />
-                        <Bar dataKey="value">
-                          {data.map((entry, index) => (
-                            <Cell
-                              key={`cell-${index}`}
-                              fill={colors[index % colors.length] || "#ccc"}
-                            />
-                          ))}
-                        </Bar>
-                      </BarChart>
-                    </ResponsiveContainer>
-                  </div>
-                </div>
-                
-                <div className="w-full">
-                  <h3 className="text-center font-bold text-xl mb-4">
-                    Current Costs vs. CECE Costs and Savings (Annually)
-                  </h3>
-                  <div className="w-full">
-                    <ResponsiveContainer width="100%" height={300}>
-                      <BarChart data={Annualdata}>
-                        <XAxis 
-                          dataKey="name" 
-                          fontSize={14}
-                          interval={0}
-                          angle={-45}
-                          textAnchor="end"
-                          height={80}
-                        />
-                        <YAxis fontSize={14}>
-                          <Label
-                            value="USD ($)"
-                            angle={-90}
-                            position="insideLeft"
-                            offset={1}
-                            style={{ textAnchor: "middle" }}
-                          />
-                        </YAxis>
-                        <Tooltip />
-                        <Bar dataKey="value">
-                          {data.map((entry, index) => (
-                            <Cell
-                              key={`cell-${index}`}
-                              fill={colors[index % colors.length] || "#ccc"}
-                            />
-                          ))}
-                        </Bar>
-                      </BarChart>
-                    </ResponsiveContainer>
-                  </div>
                 </div>
               </div>
             </div>
