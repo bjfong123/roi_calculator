@@ -1,5 +1,7 @@
 "use client";
 import { useState, useEffect } from "react";
+import CleaningGame from './CleaningGame'; // Adjust path as needed
+
 import CurrencyInput from "react-currency-input-field";
 import Image from "next/image";
 import {
@@ -18,6 +20,7 @@ import {
 } from "recharts";
 import { FaCheckCircle, FaChevronDown, FaChevronUp } from "react-icons/fa";
 import BeforeAfterSlider from "./BeforeAfterSlider";
+import { FaPlay, FaPause, FaRedo, FaTrophy, FaRobot, FaUser } from "react-icons/fa";
 
 const formatCurrency = (value) =>
   new Intl.NumberFormat("en-US", {
@@ -117,12 +120,13 @@ export default function Home() {
     <>
       <main className="bg-stone-800 text-gray-900 min-h-screen py-4 px-2">
         <div className="w-full max-w-none lg:max-w-[90vw] xl:max-w-[85vw] 2xl:max-w-7xl mx-auto bg-white shadow-2xl rounded-none lg:rounded-xl overflow-hidden">
-          <div className="flex items-center justify-center p-6 lg:p-8">
-            <h1 className="text-4xl lg:text-5xl font-bold text-center leading-tight">
-              Operation ROI Calculator
-            </h1>
+          <div className="flex items-center justify-center p-3 lg:p-8">
+            <Image src={"/Operation_Autopilot.png"} alt="Description" width={300} height={200} />
           </div>
-          
+          {/* Add this after the sliders section and before the results */}
+<CleaningGame laborRate={laborRate} courts={courts} />
+
+          {/* 
           <div className="p-0 m-0 print:hidden">
             <BeforeAfterSlider
               hours={hours}
@@ -132,54 +136,13 @@ export default function Home() {
               afterAlt="Robot cleaning capacity visualization"
             />
           </div>
-          
+          */}
           <div className="flex flex-col xl:flex-row gap-0 xl:gap-8 p-6 lg:p-8 xl:p-10">
             
             <div className="flex-1 xl:flex-none xl:w-1/2 bg-white rounded-lg shadow-lg p-8 lg:p-10 mb-6 xl:mb-0">
           
-              <p className="text-center text-black mb-8 text-2xl font-bold">
-                Estimate your savings with automated court cleaning
-              </p>
-
-              {/* Results - Now update automatically */}
-              <div className="bg-gray-100 p-6 rounded-lg mb-6">
-                <p className="text-3xl text-gray-600 font-bold mb-2">
-                  Current Monthly Costs:
-                </p>
-                <div className="text-5xl font-bold text-red-600">
-                  {formatCurrency(currentMonthlyCost)}
-                </div>
-              </div>
-
-              <div className="bg-gray-100 p-6 rounded-lg mb-8">
-                <p className="text-3xl text-gray-600 font-bold mb-2">
-                  Current Annual Costs:
-                </p>
-                <div className="text-5xl font-bold text-red-600">
-                  {formatCurrency(currentAnnualCost)}
-                </div>
-              </div>
-
-              <div className="bg-gray-100 p-6 rounded-lg mb-6">
-                <p className="text-3xl text-gray-600 font-bold mb-2">
-                  Estimated Monthly Savings:
-                </p>
-                <div className="text-5xl font-bold text-green-700">
-                  {formatCurrency(monthlySavings)}
-                </div>
-              </div>
-              
-              <div className="bg-gray-100 p-6 rounded-lg mb-8">
-                <p className="text-3xl text-gray-600 font-bold mb-2">
-                  Estimated Annual Savings:
-                </p>
-                <div className="text-5xl font-bold text-green-700">
-                  {formatCurrency(annualSavings)}
-                </div>
-              </div>
-
               {/* Sliders - Now trigger automatic updates */}
-              <div className="space-y-6 print:hidden">
+              <div className="space-y- print:hidden">
                 <Slider
                   label="Fully burdened labor rate (hourly)"
                   min={10}
@@ -219,7 +182,47 @@ export default function Home() {
                   setValue={setCourts}
                 />
               </div>
+              
+              <p className="text-center text-black mb-8 text-2xl font-bold">
+                Estimate your savings with automated court cleaning
+              </p>
 
+              {/* Results - Now update automatically */}
+              <div className="bg-gray-100 p-6 rounded-lg mb-6">
+                <p className="text-3xl text-gray-600 font-bold mb-2">
+                  Current Monthly Costs:
+                </p>
+                <div className="text-5xl font-bold text-red-600">
+                  {formatCurrency(currentMonthlyCost)}
+                </div>
+              </div>
+
+              <div className="bg-gray-100 p-6 rounded-lg mb-8">
+                <p className="text-3xl text-gray-600 font-bold mb-2">
+                  Current Annual Costs:
+                </p>
+                <div className="text-5xl font-bold text-red-600">
+                  {formatCurrency(currentAnnualCost)}
+                </div>
+              </div>
+
+              <div className="bg-gray-100 p-6 rounded-lg mb-6">
+                <p className="text-3xl text-gray-600 font-bold mb-2">
+                  Estimated Monthly Savings:
+                </p>
+                <div className="text-5xl font-bold text-green-700">
+                  {formatCurrency(monthlySavings)}
+                </div>
+              </div>
+              
+              <div className="bg-gray-100 p-6 rounded-lg mb-8">
+                <p className="text-3xl text-gray-600 font-bold mb-2"> 
+                  Estimated Annual Savings:
+                </p>
+                <div className="text-5xl font-bold text-green-700">
+                  {formatCurrency(annualSavings)}
+                </div>
+              </div>
               
 
               {/* Calculate button removed - everything updates automatically */}
