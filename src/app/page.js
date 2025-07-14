@@ -137,8 +137,8 @@ export default function Home() {
             />
           </div>
           */}
-          <div className="flex flex-row w-full">
-            <h1 className="text-5xl text-center font-bold content-center"> Operation Calculate Your ROI </h1>
+          <div className="text-5xl text-center font-bold bg-lime-500 flex-items-center mx-90 h-20 py-4 text-gray-800 rounded-2xl">
+            <h1 className=""> Calculate Your ROI </h1>
 
 
           </div>
