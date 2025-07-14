@@ -124,7 +124,7 @@ export default function Home() {
             <Image src={"/Operation_Autopilot.png"} alt="Description" width={300} height={200} />
           </div>
           {/* Add this after the sliders section and before the results */}
-<CleaningGame laborRate={laborRate} courts={courts} />
+{/* <CleaningGame laborRate={laborRate} courts={courts} /> */}
 
           {/* 
           <div className="p-0 m-0 print:hidden">
@@ -137,314 +137,135 @@ export default function Home() {
             />
           </div>
           */}
+          <div className="flex flex-row w-full">
+            <h1 className="text-5xl text-center font-bold content-center"> Operation Calculate Your ROI </h1>
+
+
+          </div>
           <div className="flex flex-col xl:flex-row gap-0 xl:gap-8 p-6 lg:p-8 xl:p-10">
-            
-            <div className="flex-1 xl:flex-none xl:w-1/2 bg-white rounded-lg shadow-lg p-8 lg:p-10 mb-6 xl:mb-0">
-          
-              {/* Sliders - Now trigger automatic updates */}
-              <div className="space-y- print:hidden">
-                <Slider
-                  label="Fully burdened labor rate (hourly)"
-                  min={10}
-                  max={100}
-                  value={laborRate}
-                  setValue={setLaborRate}
-                  prefix="$"
-                />
-                <Slider
-                  label="Personnel per cleaning"
-                  min={1}
-                  max={10}
-                  value={personnel}
-                  setValue={setPersonnel}
-                />
-                <Slider
-                  label="Hours per cleaning"
-                  min={1}
-                  max={5}
-                  step={0.5}
-                  value={hours}
-                  setValue={setHours}
-                  suffix=" hrs"
-                />
-                <Slider
-                  label="Cleanings per week"
-                  min={1}
-                  max={14}
-                  value={frequency}
-                  setValue={setFrequency}
-                />
-                <Slider
-                  label="Number of courts"
-                  min={1}
-                  max={30}
-                  value={courts}
-                  setValue={setCourts}
-                />
-              </div>
-              
-              <p className="text-center text-black mb-8 text-2xl font-bold">
-                Estimate your savings with automated court cleaning
-              </p>
+  {/* Left Panel: Sliders and Robot Plans */}
+  <div className="flex-1 xl:w-1/2 bg-white rounded-lg shadow-lg p-8 lg:p-10">
+    {/* Sliders */}
+    <div className="space-y- print:hidden">
+      <Slider label="Fully burdened labor rate (hourly)" min={10} max={100} value={laborRate} setValue={setLaborRate} prefix="$" />
+      <Slider label="Personnel per cleaning" min={1} max={10} value={personnel} setValue={setPersonnel} />
+      <Slider label="Hours per cleaning" min={1} max={5} step={0.5} value={hours} setValue={setHours} suffix=" hrs" />
+      <Slider label="Cleanings per week" min={1} max={14} value={frequency} setValue={setFrequency} />
+      <Slider label="Number of courts" min={1} max={30} value={courts} setValue={setCourts} />
+    </div>
 
-              {/* Results - Now update automatically */}
-              <div className="bg-gray-100 p-6 rounded-lg mb-6">
-                <p className="text-3xl text-gray-600 font-bold mb-2">
-                  Current Monthly Costs:
-                </p>
-                <div className="text-5xl font-bold text-red-600">
-                  {formatCurrency(currentMonthlyCost)}
+    {/* Robot Plan Selection */}
+    <div className="mt-12">
+      <label className="block font-semibold mb-4 text-2xl">Robot 3-year lease plan</label>
+      <div className="flex flex-col gap-4">
+        {[799, 899, 999].map((cost) => (
+          <div key={cost} className="relative">
+            <div 
+              className={`border-2 rounded-lg p-4 cursor-pointer transition-all ${
+                robotCost === cost ? `border-${cost === 799 ? 'green' : cost === 899 ? 'purple' : 'blue'}-500 bg-${cost === 799 ? 'green' : cost === 899 ? 'purple' : 'blue'}-50` : 'border-gray-300'
+              }`}
+              onClick={() => {
+                handleRobotPlanChange(cost);
+                toggleDropdown(cost);
+              }}
+            >
+              <div className="flex items-center justify-between">
+                <div className="flex items-center">
+                  <input
+                    type="radio"
+                    name="robotCost"
+                    value={cost}
+                    checked={robotCost === cost}
+                    onChange={() => handleRobotPlanChange(cost)}
+                    className="form-radio h-5 w-5 mr-3"
+                  />
+                  <span className="text-xl font-semibold">${cost}/Month Plan</span>
                 </div>
+                {activeDropdown === cost ? <FaChevronUp /> : <FaChevronDown />}
               </div>
-
-              <div className="bg-gray-100 p-6 rounded-lg mb-8">
-                <p className="text-3xl text-gray-600 font-bold mb-2">
-                  Current Annual Costs:
-                </p>
-                <div className="text-5xl font-bold text-red-600">
-                  {formatCurrency(currentAnnualCost)}
-                </div>
-              </div>
-
-              <div className="bg-gray-100 p-6 rounded-lg mb-6">
-                <p className="text-3xl text-gray-600 font-bold mb-2">
-                  Estimated Monthly Savings:
-                </p>
-                <div className="text-5xl font-bold text-green-700">
-                  {formatCurrency(monthlySavings)}
-                </div>
-              </div>
-              
-              <div className="bg-gray-100 p-6 rounded-lg mb-8">
-                <p className="text-3xl text-gray-600 font-bold mb-2"> 
-                  Estimated Annual Savings:
-                </p>
-                <div className="text-5xl font-bold text-green-700">
-                  {formatCurrency(annualSavings)}
-                </div>
-              </div>
-              
-
-              {/* Calculate button removed - everything updates automatically */}
-            </div>
-
-            <div className="flex-1 xl:flex-none xl:w-1/2 bg-white rounded-lg shadow-lg p-8 lg:p-10">
-              <div className="flex flex-col items-center space-y-10">
-                
-                {/* Charts now update automatically */}
-                <div className="w-full">
-                  <h3 className="text-center font-bold text-xl mb-4">
-                    Current Costs vs. CECE Costs and Savings (Monthly)
-                  </h3>
-                  <div className="w-full">
-                    <ResponsiveContainer width="100%" height={300}>
-                      <BarChart data={data}>
-                        <XAxis 
-                          dataKey="name" 
-                          fontSize={14}
-                          interval={0}
-                          angle={-45}
-                          textAnchor="end"
-                          height={80}
-                        />
-                        <YAxis fontSize={14}>
-                          <Label
-                            value="USD ($)"
-                            angle={-90}
-                            position="insideLeft"
-                            offset={1}
-                            style={{ textAnchor: "middle" }}
-                          />
-                        </YAxis>
-                        <Tooltip />
-                        <Bar dataKey="value">
-                          {data.map((entry, index) => (
-                            <Cell
-                              key={`cell-${index}`}
-                              fill={colors[index % colors.length] || "#ccc"}
-                            />
-                          ))}
-                        </Bar>
-                      </BarChart>
-                    </ResponsiveContainer>
-                    
-                  </div>
-
-                </div>
-                
-                <div className="w-full">
-                  <h3 className="text-center font-bold text-xl mb-4">
-                    Current Costs vs. CECE Costs and Savings (Annually)
-                  </h3>
-                  <div className="w-full">
-                    <ResponsiveContainer width="100%" height={300}>
-                      <BarChart data={Annualdata}>
-                        <XAxis 
-                          dataKey="name" 
-                          fontSize={14}
-                          interval={0}
-                          angle={-45}
-                          textAnchor="end"
-                          height={80}
-                        />
-                        <YAxis fontSize={14}>
-                          <Label
-                            value="USD ($)"
-                            angle={-90}
-                            position="insideLeft"
-                            offset={1}
-                            style={{ textAnchor: "middle" }}
-                          />
-                        </YAxis>
-                        <Tooltip />
-                        <Bar dataKey="value">
-                          {data.map((entry, index) => (
-                            <Cell
-                              key={`cell-${index}`}
-                              fill={colors[index % colors.length] || "#ccc"}
-                            />
-                          ))}
-                        </Bar>
-                      </BarChart>
-                    </ResponsiveContainer>
-                  </div>
-                  {/* Robot Plan Selection with Dropdowns */}
-              <div className="mb-8 mt-8">
-                <label className="block font-semibold mb-4 text-2xl">
-                  Robot 3-year lease plan
-                </label>
-                <div className="flex flex-col gap-4">
-                  
-                  {/* $799 Plan */}
-                  <div className="relative">
-                    <div 
-                      className={`border-2 rounded-lg p-4 cursor-pointer transition-all ${
-                        robotCost === 799 ? 'border-green-500 bg-green-50' : 'border-gray-300'
-                      }`}
-                      onClick={() => {
-                        handleRobotPlanChange(799);
-                        toggleDropdown(799);
-                      }}
-                    >
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center">
-                          <input
-                            type="radio"
-                            name="robotCost"
-                            value={799}
-                            checked={robotCost === 799}
-                            onChange={() => handleRobotPlanChange(799)}
-                            className="form-radio h-5 w-5 mr-3"
-                          />
-                          <span className="text-xl font-semibold">$799/Month Plan</span>
-                        </div>
-                        {activeDropdown === 799 ? <FaChevronUp /> : <FaChevronDown />}
-                      </div>
-                      
-                      {activeDropdown === 799 && (
-                        <div className="mt-4 pl-8 border-t pt-4">
-                          {planFeatures[799].map((feature, index) => (
-                            <div key={index} className="flex items-center mb-2">
-                              <span className="text-sm text-gray-600">• {feature.name}</span>
-                            </div>
-                          ))}
-                        </div>
-                      )}
+              {activeDropdown === cost && (
+                <div className="mt-4 pl-8 border-t pt-4">
+                  {planFeatures[cost].map((feature, index) => (
+                    <div key={index} className="flex items-center mb-2">
+                      <FaCheckCircle className="text-green-600 mr-2 w-4 h-4" />
+                      <span className="text-sm text-gray-600">{feature.name}</span>
                     </div>
-                  </div>
-
-                  {/* $899 Plan */}
-                  <div className="relative">
-                    <div 
-                      className={`border-2 rounded-lg p-4 cursor-pointer transition-all ${
-                        robotCost === 899 ? 'border-purple-500 bg-purple-50' : 'border-gray-300'
-                      }`}
-                      onClick={() => {
-                        handleRobotPlanChange(899);
-                        toggleDropdown(899);
-                      }}
-                    >
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center">
-                          <input
-                            type="radio"
-                            name="robotCost"
-                            value={899}
-                            checked={robotCost === 899}
-                            onChange={() => handleRobotPlanChange(899)}
-                            className="form-radio h-5 w-5 mr-3"
-                          />
-                          <span className="text-xl font-semibold">$899/Month Plan</span>
-                        </div>
-                        {activeDropdown === 899 ? <FaChevronUp /> : <FaChevronDown />}
-                      </div>
-                      
-                      {activeDropdown === 899 && (
-                        <div className="mt-4 pl-8 border-t pt-4">
-                          {planFeatures[899].map((feature, index) => (
-                            <div key={index} className="flex items-center mb-2">
-                              <FaCheckCircle className="text-green-600 mr-2 w-4 h-4" />
-                              <span className="text-sm text-gray-600">{feature.name}</span>
-                            </div>
-                          ))}
-                        </div>
-                      )}
-                    </div>
-                  </div>
-
-                  {/* $999 Plan */}
-                  <div className="relative">
-                    <div 
-                      className={`border-2 rounded-lg p-4 cursor-pointer transition-all ${
-                        robotCost === 999 ? 'border-blue-500 bg-blue-50' : 'border-gray-300'
-                      }`}
-                      onClick={() => {
-                        handleRobotPlanChange(999);
-                        toggleDropdown(999);
-                      }}
-                    >
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center">
-                          <input
-                            type="radio"
-                            name="robotCost"
-                            value={999}
-                            checked={robotCost === 999}
-                            onChange={() => handleRobotPlanChange(999)}
-                            className="form-radio h-5 w-5 mr-3"
-                          />
-                          <span className="text-xl font-semibold">$999/Month Plan</span>
-                        </div>
-                        {activeDropdown === 999 ? <FaChevronUp /> : <FaChevronDown />}
-                      </div>
-                      
-                      {activeDropdown === 999 && (
-                        <div className="mt-4 pl-8 border-t pt-4">
-                          {planFeatures[999].map((feature, index) => (
-                            <div key={index} className="flex items-center mb-2">
-                              <FaCheckCircle className="text-green-600 mr-2 w-4 h-4" />
-                              <span className="text-sm text-gray-600">{feature.name}</span>
-                            </div>
-                          ))}
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                      <div className="flex justify-center align-center">
-                      <button
-                      onClick={() => window.print()}
-                      className="bg-green-900 text-white rounded-xl brightness-150 w-50 h-10 text-xl hover:bg-green-800 transition-all"
-                      >
-                        Print page
-
-                      </button>
-                      </div>
+                  ))}
                 </div>
-              </div>
-                </div>
-              </div>
+              )}
             </div>
           </div>
+        ))}
+        <div className="flex justify-center align-center">
+          <button
+            onClick={() => window.print()}
+            className="bg-green-900 text-white rounded-xl brightness-150 w-50 h-10 text-xl hover:bg-green-800 transition-all"
+          >
+            Print page
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  {/* Right Panel: Results and Graphs split vertically */}
+  <div className="flex-1 xl:w-1/2 flex flex-col gap-6">
+    {/* Results */}
+    <div className="bg-white rounded-lg shadow-lg p-8 lg:p-10">
+      <p className="text-center text-black mb-6 text-2xl font-bold">Estimate your savings with automated court cleaning</p>
+
+      <div className="space-y-4">
+        <div className="bg-gray-100 p-6 rounded-lg flex justify-between items-center">
+          <p className="text-2xl text-gray-600 font-bold">Current Monthly Costs:</p>
+          <div className="text-4xl font-bold text-red-600">{formatCurrency(currentMonthlyCost)}</div>
+        </div>
+        <div className="bg-gray-100 p-6 rounded-lg flex justify-between items-center">
+          <p className="text-2xl text-gray-600 font-bold">Current Annual Costs:</p>
+          <div className="text-4xl font-bold text-red-600">{formatCurrency(currentAnnualCost)}</div>
+        </div>
+        <div className="bg-gray-100 p-6 rounded-lg flex justify-between items-center">
+          <p className="text-2xl text-gray-600 font-bold">Estimated Monthly Savings:</p>
+          <div className="text-4xl font-bold text-green-700">{formatCurrency(monthlySavings)}</div>
+        </div>
+        <div className="bg-gray-100 p-6 rounded-lg flex justify-between items-center">
+          <p className="text-2xl text-gray-600 font-bold">Estimated Annual Savings:</p>
+          <div className="text-4xl font-bold text-green-700">{formatCurrency(annualSavings)}</div>
+        </div>
+      </div>
+    </div>
+
+    {/* Graphs */}
+    <div className="bg-white rounded-lg shadow-lg p-8 lg:p-10">
+      <h3 className="text-center font-bold text-xl mb-4">Current Costs vs. CECE Costs and Savings (Monthly)</h3>
+      <ResponsiveContainer width="100%" height={300}>
+        <BarChart data={data}>
+          <XAxis dataKey="name" fontSize={14} interval={0} angle={-45} textAnchor="end" height={80} />
+          <YAxis fontSize={14}>
+            <Label value="USD ($)" angle={-90} position="insideLeft" />
+          </YAxis>
+          <Tooltip />
+          <Bar dataKey="value">
+            {data.map((entry, index) => <Cell key={`cell-${index}`} fill={colors[index % colors.length] || "#ccc"} />)}
+          </Bar>
+        </BarChart>
+      </ResponsiveContainer>
+
+      <h3 className="text-center font-bold text-xl mt-10 mb-4">Current Costs vs. CECE Costs and Savings (Annually)</h3>
+      <ResponsiveContainer width="100%" height={300}>
+        <BarChart data={Annualdata}>
+          <XAxis dataKey="name" fontSize={14} interval={0} angle={-45} textAnchor="end" height={80} />
+          <YAxis fontSize={14}>
+            <Label value="USD ($)" angle={-90} position="insideLeft" />
+          </YAxis>
+          <Tooltip />
+          <Bar dataKey="value">
+            {Annualdata.map((entry, index) => <Cell key={`cell-a-${index}`} fill={colors[index % colors.length] || "#ccc"} />)}
+          </Bar>
+        </BarChart>
+      </ResponsiveContainer>
+    </div>
+  </div>
+</div>   
         </div>
       </main>
     </>
