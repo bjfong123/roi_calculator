@@ -149,7 +149,7 @@ export default function Home() {
     <div className="space-y- print:hidden">
       <Slider label="Fully burdened labor rate (hourly)" min={10} max={100} step={0.5} value={laborRate} setValue={setLaborRate} prefix="$" />
       <Slider label="Personnel per cleaning" min={1} max={10} step={0.5} value={personnel} setValue={setPersonnel} />
-      <Slider label="Hours per cleaning" min={1} max={5} step={0.5} value={hours} setValue={setHours} suffix=" hrs" />
+      <Slider label="Hours per cleaning" min={1} max={10} step={0.5} value={hours} setValue={setHours} suffix=" hrs" />
       <Slider label="Cleanings per week" min={1} max={14} step={0.5} value={frequency} setValue={setFrequency} />
       <Slider label="Number of courts" min={1} max={30} step={0.5} value={courts} setValue={setCourts} />
     </div>
