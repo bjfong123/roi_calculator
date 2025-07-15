@@ -282,6 +282,43 @@ function Slider({
   prefix = "",
   suffix = "",
 }) {
+  const [inputValue, setInputValue] = useState(value.toString());
+
+  useEffect(() => {
+    setInputValue(value.toString());
+  }, [value]);
+
+  const handleInputChange = (e) => {
+    const val = e.target.value;
+    // Allow empty string to let user clear the field
+    if (val === "") {
+      setInputValue("");
+      setValue(0);
+      return;
+    }
+    // Remove leading zeros
+    const numericVal = val.replace(/^0+(?=\d)/, "");
+    setInputValue(numericVal);
+    const parsed = parseFloat(numericVal);
+    if (!isNaN(parsed)) {
+      setValue(parsed);
+    }
+  };
+
+  const handleFocus = () => {
+    // Clear input if it matches the default value
+    if (inputValue === value.toString()) {
+      setInputValue("");
+    }
+  };
+
+  const handleBlur = () => {
+    // Restore default value if input is empty
+    if (inputValue === "") {
+      setInputValue(value.toString());
+    }
+  };
+
   return (
     <div className="mb-6">
       <label className="block font-semibold mb-3 text-2xl">
@@ -301,8 +338,10 @@ function Slider({
         <input
           className="inline-block w-24 text-center border border-gray-300 rounded px-2 py-1 text-lg"
           type="number"
-          value={value}
-          onChange={(e) => setValue(parseFloat(e.target.value) || 0)}
+          value={inputValue}
+          onChange={handleInputChange}
+          onFocus={handleFocus}
+          onBlur={handleBlur}
           min={min}
           max={max}
           step={step}
@@ -312,3 +351,4 @@ function Slider({
     </div>
   );
 }
+
