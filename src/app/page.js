@@ -32,7 +32,7 @@ const formatCurrency = (value) =>
 export default function Home() {
   const [laborRate, setLaborRate] = useState(15);
   const [personnel, setPersonnel] = useState(1);
-  const [hours, setHours] = useState(1.5);
+  const [hours, setHours] = useState(3);
   const [frequency, setFrequency] = useState(2);
   const [courts, setCourts] = useState(15);
   const [robotCost, setRobotCost] = useState(799);
@@ -42,7 +42,7 @@ export default function Home() {
   const [activeDropdown, setActiveDropdown] = useState(null);
   const [currentMonthlyCost, setCurrentMonthlyCost] = useState(0);
   const [currentAnnualCost, setCurrentAnnualCost] = useState(0);
-
+  
   const colors = ["#FF6384", "#F9da5b", "#82ca9d"];
 
   // Plan features data
@@ -216,20 +216,24 @@ export default function Home() {
 
       <div className="space-y-4">
         <div className="bg-gray-100 p-6 rounded-lg flex justify-between items-center">
-          <p className="text-2xl text-gray-600 font-bold">Current Monthly Costs:</p>
+          <p className="text-2xl text-gray-600 font-bold">Current Costs (Monthly):</p>
           <div className="text-4xl font-bold text-red-600">{formatCurrency(currentMonthlyCost)}</div>
         </div>
         <div className="bg-gray-100 p-6 rounded-lg flex justify-between items-center">
-          <p className="text-2xl text-gray-600 font-bold">Current Annual Costs:</p>
+          <p className="text-2xl text-gray-600 font-bold">Current Costs (Annual):</p>
           <div className="text-4xl font-bold text-red-600">{formatCurrency(currentAnnualCost)}</div>
         </div>
         <div className="bg-gray-100 p-6 rounded-lg flex justify-between items-center">
-          <p className="text-2xl text-gray-600 font-bold">Estimated Monthly Savings:</p>
+          <p className="text-2xl text-gray-600 font-bold">Estimated Savings (Monthly):</p>
           <div className="text-4xl font-bold text-green-700">{formatCurrency(monthlySavings)}</div>
         </div>
         <div className="bg-gray-100 p-6 rounded-lg flex justify-between items-center">
-          <p className="text-2xl text-gray-600 font-bold">Estimated Annual Savings:</p>
+          <p className="text-2xl text-gray-600 font-bold">Estimated Savings (Annually):</p>
           <div className="text-4xl font-bold text-green-700">{formatCurrency(annualSavings)}</div>
+        </div>
+        <div className="bg-gray-100 p-6 rounded-lg flex justify-between items-center">
+          <p className="text-2xl text-gray-600 font-bold">Time Saved (Monthly):</p>
+          <div className="text-4xl font-bold text-green-700">{(hours * frequency * 4 / 2).toFixed(1)} hrs</div> 
         </div>
       </div>
     </div>
