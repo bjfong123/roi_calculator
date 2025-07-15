@@ -147,11 +147,11 @@ export default function Home() {
   <div className="flex-1 xl:w-1/2 bg-white rounded-lg shadow-lg p-8 lg:p-10">
     {/* Sliders */}
     <div className="space-y- print:hidden">
-      <Slider label="Fully burdened labor rate (hourly)" min={10} max={100} value={laborRate} setValue={setLaborRate} prefix="$" />
-      <Slider label="Personnel per cleaning" min={1} max={10} value={personnel} setValue={setPersonnel} />
+      <Slider label="Fully burdened labor rate (hourly)" min={10} max={100} step={0.5} value={laborRate} setValue={setLaborRate} prefix="$" />
+      <Slider label="Personnel per cleaning" min={1} max={10} step={0.5} value={personnel} setValue={setPersonnel} />
       <Slider label="Hours per cleaning" min={1} max={5} step={0.5} value={hours} setValue={setHours} suffix=" hrs" />
-      <Slider label="Cleanings per week" min={1} max={14} value={frequency} setValue={setFrequency} />
-      <Slider label="Number of courts" min={1} max={30} value={courts} setValue={setCourts} />
+      <Slider label="Cleanings per week" min={1} max={14} step={0.5} value={frequency} setValue={setFrequency} />
+      <Slider label="Number of courts" min={1} max={30} step={0.5} value={courts} setValue={setCourts} />
     </div>
 
     {/* Robot Plan Selection */}
@@ -294,32 +294,47 @@ function Slider({
 
   const handleInputChange = (e) => {
     const val = e.target.value;
-    // Allow empty string to let user clear the field
-    if (val === "") {
-      setInputValue("");
-      setValue(0);
-      return;
-    }
-    // Remove leading zeros
-    const numericVal = val.replace(/^0+(?=\d)/, "");
-    setInputValue(numericVal);
-    const parsed = parseFloat(numericVal);
+    setInputValue(val);
+    
+    // Only update the actual value if it's a valid number
+    const parsed = parseFloat(val);
     if (!isNaN(parsed)) {
-      setValue(parsed);
+      // Clamp the value between min and max
+      const clampedValue = Math.max(min, Math.min(max, parsed));
+      setValue(clampedValue);
     }
   };
 
-  const handleFocus = () => {
-    // Clear input if it matches the default value
-    if (inputValue === value.toString()) {
-      setInputValue("");
-    }
+  const handleFocus = (e) => {
+    // Select all text when focusing for easy editing
+    e.target.select();
   };
 
   const handleBlur = () => {
-    // Restore default value if input is empty
-    if (inputValue === "") {
+    // Restore the actual value if input is empty or invalid
+    if (inputValue === "" || isNaN(parseFloat(inputValue))) {
       setInputValue(value.toString());
+    } else {
+      // Ensure the displayed value matches the clamped value
+      const parsed = parseFloat(inputValue);
+      const clampedValue = Math.max(min, Math.min(max, parsed));
+      setInputValue(clampedValue.toString());
+      setValue(clampedValue);
+    }
+  };
+
+  const handleKeyDown = (e) => {
+    // Handle arrow key increments/decrements
+    if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      const newValue = Math.min(max, value + step);
+      setValue(newValue);
+      setInputValue(newValue.toString());
+    } else if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      const newValue = Math.max(min, value - step);
+      setValue(newValue);
+      setInputValue(newValue.toString());
     }
   };
 
@@ -346,6 +361,7 @@ function Slider({
           onChange={handleInputChange}
           onFocus={handleFocus}
           onBlur={handleBlur}
+          onKeyDown={handleKeyDown}
           min={min}
           max={max}
           step={step}
@@ -355,4 +371,5 @@ function Slider({
     </div>
   );
 }
+
 
