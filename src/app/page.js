@@ -1,9 +1,5 @@
 "use client";
-import { useState, useEffect } from "react";
-import CleaningGame from './CleaningGame'; // Adjust path as needed
-
-import CurrencyInput from "react-currency-input-field";
-import Image from "next/image";
+import React, { useState, useEffect } from "react";
 import {
   BarChart,
   XAxis,
@@ -17,10 +13,13 @@ import {
   LineChart,
   CartesianGrid,
   Line,
+  Area 
 } from "recharts";
-import { FaCheckCircle, FaChevronDown, FaChevronUp } from "react-icons/fa";
-import BeforeAfterSlider from "./BeforeAfterSlider";
-import { FaPlay, FaPause, FaRedo, FaTrophy, FaRobot, FaUser } from "react-icons/fa";
+import { FaCheckCircle, FaChevronDown, FaChevronUp, FaPlay, FaPause, FaRedo, FaTrophy, FaRobot, FaUser } from "react-icons/fa";
+import Image from "next/image";
+
+
+// Calculate total minutes saved per cleaning cycle (all courts in all clubs)
 
 const formatCurrency = (value) =>
   new Intl.NumberFormat("en-US", {
@@ -30,35 +29,68 @@ const formatCurrency = (value) =>
   }).format(value);
 
 export default function Home() {
-  const [laborRate, setLaborRate] = useState(15);
-  const [personnel, setPersonnel] = useState(1);
-  const [hours, setHours] = useState(3);
-  const [frequency, setFrequency] = useState(2);
+  const [numClub, setClub] = useState(15);
   const [courts, setCourts] = useState(15);
-  const [robotCost, setRobotCost] = useState(799);
+  const [laborRate, setLaborRate] = useState(0);
+  const [weeklyRate, setWeeklyRate] = useState(0);
+  const [monthlyRate, setMonthlyRate] = useState(0);
+  const [personnel, setPersonnel] = useState(1);
+
+  const [otherHours, setOtherHours] = useState(30);
+  const [frequency, setFrequency] = useState(5);
+  const [mopFrequency, setMopFrequency] = useState(5);
+  const [scrubfrequency, setScrubFrequency] = useState(5);
+  const [vacuumFrequency, setVacuumFrequency] = useState(5);
+  const [sweepingFrequency, setSweepingFrequency] = useState(5);
+  const [dryCleanHours, setDryCleanHours] = useState(30);
+  const [mopHours, setmopHours] = useState(30);
+  const [scrubHours, setScrubHours] = useState(30);
+  const [vacuumHours, setVacuumHours] = useState(30);
+  const [robotCost, setRobotCost] = useState(899);
   const [installationFee, setInstallationFee] = useState(0);
   const [monthlySavings, setMonthlySavings] = useState(0);
   const [annualSavings, setAnnualSavings] = useState(0);
   const [activeDropdown, setActiveDropdown] = useState(null);
   const [currentMonthlyCost, setCurrentMonthlyCost] = useState(0);
   const [currentAnnualCost, setCurrentAnnualCost] = useState(0);
-  
-  const colors = ["#FF6384", "#F9da5b", "#82ca9d"];
+  const [selectedReasons, setSelectedReasons] = useState([]);
+  const [otherReason, setOtherReason] = useState("");
+  const [selectedCleaningOptions, setSelectedCleaningOptions] = useState([]);
+  const [chartView, setChartView] = useState("monthly");
+  const [sweepingOther, setSweepingOther] = useState(0);
+  const [moppingOther, setMoppingOther] = useState(0);
+  const [scrubbingOther, setScrubbingOther] = useState(0);
+  const [vacuumingOther, setVacuumingOther] = useState(0);
+  const [automationEfficiency, setAutomationEfficiency] = useState(0.6);
 
+  const months = [
+  "Jan", "Feb", "Mar", "Apr", "May", "Jun",
+  "Ju", "Aug", "Sep", "Oct", "Nov", "Dec"
+];
+
+// Build dataset for 12 months
+const savingsData = months.map((month, i) => ({
+  month,
+  monthly: monthlySavings, // constant
+  cumulative: monthlySavings * (i + 1) // grows cumulatively
+}));
+
+
+  const colors = ["#FF6384", "#F9da5b", "#82ca9d"];
   // Plan features data
   const planFeatures = {
-    799: [
+    899: [
       { name: "Basic Plan", included: true },
       { name: "Standard Support", included: true },
     ],
-    899: [
-      { name: "Void Setup Fee (-$2000)", included: true },
+    999: [
+      { name: "Void Setup Fee", included: true },
       { name: "Software Installation Training", included: true },
       { name: "Enhanced Support", included: true },
     ],
-    999: [
+    1199: [
       { name: "Warranty", included: true },
-      { name: "Void Setup Fee (-$2000)", included: true },
+      { name: "Void Setup Fee", included: true },
       { name: "48-hour Swap Guarantee", included: true },
       { name: "Software Installation Training", included: true },
       { name: "Marketing Launch Promotion", included: true },
@@ -67,28 +99,129 @@ export default function Home() {
     ],
   };
 
-  // Auto-calculate ROI whenever any input changes
+  const reasons = [
+    "Save Money/Prevent Resurfacing Costs",
+    "Save Time",
+    "Improve Cleaning Quality",
+    "Energy Efficiency",
+    "Extend Court Lifespan",
+    "Other",
+  ];
+
+
+  const totalMinutesPerCycle =
+  (dryCleanHours * sweepingFrequency) +
+  (sweepingOther * sweepingFrequency) +
+  (mopHours * mopFrequency) +
+  (moppingOther * mopFrequency) +
+  (scrubHours * scrubfrequency) +
+  (scrubbingOther * scrubfrequency) +
+  (vacuumHours * vacuumFrequency) +
+  (vacuumingOther * vacuumFrequency) +
+  (otherHours * frequency);
+
+
+
+const monthlyTimeSpent = ((totalMinutesPerCycle * courts * numClub) * 4.33) / 60;
+const yearlyTimeSpent = ((totalMinutesPerCycle * courts * numClub) * 52) / 60;
+
+
+const monthlyTimeWithAutomation = monthlyTimeSpent * (1 - automationEfficiency);
+const monthlyTimeSaved = monthlyTimeSpent - monthlyTimeWithAutomation;
+
+const yearlyTimeWithAutomation = yearlyTimeSpent * (1 - automationEfficiency);
+const yearlyTimeSaved = yearlyTimeSpent - yearlyTimeWithAutomation;
+
+
   useEffect(() => {
-    const calculateROI = () => {
-      const weeklyCost = laborRate * personnel * hours * courts * frequency;
-      const monthlyCost = weeklyCost * 4;
-      const totalRobotCost = robotCost;
-      const savings = monthlyCost - totalRobotCost;
+  // Total weekly minutes for all tasks
+  const weeklyMinutesPerCourt =
+    (dryCleanHours + sweepingOther) * sweepingFrequency +
+    (mopHours + moppingOther) * mopFrequency +
+    (scrubHours + scrubbingOther) * scrubfrequency +
+    (vacuumHours + vacuumingOther) * vacuumFrequency +
+    otherHours * frequency;
 
-      setMonthlySavings(savings - installationFee);
-      setAnnualSavings(savings * 12 - installationFee);
-      setCurrentMonthlyCost(monthlyCost);
-      setCurrentAnnualCost(monthlyCost*12);
-    };
+  // Convert to total weekly hours for all courts/clubs
+  const totalWeeklyHours =
+    (weeklyMinutesPerCourt / 60) * courts * numClub;
 
-    calculateROI();
-  }, [laborRate, personnel, hours, frequency, courts, robotCost, installationFee]);
+  let computedWeeklyLaborCost = 0;
+  let computedMonthlyLaborCost = 0;
+
+  if (laborRate > 0) {
+    // Hourly labor rate times total weekly hours
+    computedWeeklyLaborCost = laborRate * totalWeeklyHours;
+    computedMonthlyLaborCost = computedWeeklyLaborCost * 4.33;
+  } else if (weeklyRate > 0) {
+    // Weekly flat rate directly
+    computedWeeklyLaborCost = weeklyRate;
+    computedMonthlyLaborCost = weeklyRate * 4.33;
+  } else if (monthlyRate > 0) {
+    // Monthly flat rate directly
+    computedMonthlyLaborCost = monthlyRate;
+    computedWeeklyLaborCost = monthlyRate / 4.33;
+  }
+
+  const currentMonthlyCost = computedMonthlyLaborCost;
+  const currentAnnualCost = currentMonthlyCost * 12;
+
+  const robotMonthlyCost = robotCost;
+  const estimatedMonthlySavings = currentMonthlyCost - robotMonthlyCost;
+  const estimatedAnnualSavings =
+    (currentMonthlyCost - robotMonthlyCost) * 12 - installationFee;
+
+  setCurrentMonthlyCost(currentMonthlyCost);
+  setCurrentAnnualCost(currentAnnualCost);
+  setMonthlySavings(estimatedMonthlySavings);
+  setAnnualSavings(estimatedAnnualSavings);
+}, [
+  numClub,
+  courts,
+  laborRate,
+  weeklyRate,
+  monthlyRate,
+  sweepingFrequency,
+  dryCleanHours,
+  sweepingOther,
+  scrubfrequency,
+  scrubHours,
+  scrubbingOther,
+  mopFrequency,
+  mopHours,
+  moppingOther,
+  vacuumFrequency,
+  vacuumHours,
+  vacuumingOther,
+  frequency,
+  otherHours,
+  robotCost,
+  installationFee,
+]);
+
+  function CollapsibleSection({ title, children }) {
+  const [open, setOpen] = useState(false);
+  return (
+    <div className="border rounded-lg mb-4 bg-gray-50 shadow-sm">
+      <button
+        className="w-full flex justify-between items-center p-3 font-bold text-lg bg-gray-100 hover:bg-gray-200 transition-all"
+        onClick={() => setOpen(!open)}
+      >
+        {title}
+        {open ? <FaChevronUp /> : <FaChevronDown />}
+      </button>
+      {open && <div className="p-4">{children}</div>}
+    </div>
+  );
+}
+
+
 
   // Calculate data for charts (updates automatically)
   const data = [
     {
       name: "Current Costs",
-      value: 4 * laborRate * personnel * hours * courts * frequency,
+      value: 4 * laborRate * personnel * courts * frequency,
     },
     { name: "CECE Costs", value: robotCost + installationFee },
     { name: "Savings", value: monthlySavings },
@@ -97,7 +230,7 @@ export default function Home() {
   const Annualdata = [
     {
       name: "Current Costs",
-      value: 4 * 12 * laborRate * personnel * hours * courts * frequency,
+      value: 4 * 12 * laborRate * personnel * courts * frequency,
     },
     { name: "CECE Costs", value: 12 * robotCost + installationFee },
     { name: "Savings", value: annualSavings },
@@ -105,8 +238,8 @@ export default function Home() {
 
   const handleRobotPlanChange = (cost) => {
     setRobotCost(cost);
-    if (cost === 799) {
-      setInstallationFee(1500);
+    if (cost === 899) {
+      setInstallationFee(2000);
     } else {
       setInstallationFee(0);
     }
@@ -116,162 +249,613 @@ export default function Home() {
     setActiveDropdown(activeDropdown === planCost ? null : planCost);
   };
 
+  const ownerRoi = () => {
+    setWeeklyRate(0);
+    setMonthlyRate(0);
+    setLaborRate(0);
+  };
+
+  const contractRoi = () => {
+    setLaborRate(0);
+    setWeeklyRate(0);
+    setMonthlyRate(3500);
+  };
+
+  const inHouseRoi = () => {
+    setLaborRate(0);
+    setWeeklyRate(5000);
+    setMonthlyRate(0);
+  };
+
+const oldMonthlyCost = currentMonthlyCost;
+const newMonthlyCost = robotCost + installationFee;
+
+const monthlyComparisonData = months.map((month) => ({
+  month,
+  oldMonthlyCost: currentMonthlyCost,
+  newMonthlyCost: robotCost + installationFee,
+  diff: currentMonthlyCost - (robotCost + installationFee) // + savings, - loss
+}));
+
   return (
     <>
       <main className="bg-stone-800 text-gray-900 min-h-screen py-4 px-2">
         <div className="w-full max-w-none lg:max-w-[90vw] xl:max-w-[85vw] 2xl:max-w-7xl mx-auto bg-white shadow-2xl rounded-none lg:rounded-xl overflow-hidden">
-          <div className="flex items-center justify-center p-3 lg:p-8">
-            <Image src={"/Operation_Autopilot.png"} alt="Description" width={300} height={200} />
-          </div>
-          {/* Add this after the sliders section and before the results */}
-{/* <CleaningGame laborRate={laborRate} courts={courts} /> */}
-
-          {/* 
-          <div className="p-0 m-0 print:hidden">
-            <BeforeAfterSlider
-              hours={hours}
-              frequency={frequency}
-              courts={courts}
-              beforeAlt="Human cleaning capacity visualization"
-              afterAlt="Robot cleaning capacity visualization"
+          <div className="flex items-center align-center justify-center p-3 lg:p-8">
+            <Image
+              src={"/logo.png"}
+              alt="Description"
+              width={300}
+              height={200}
             />
           </div>
-          */}
-          <div className="text-5xl text-center font-bold bg-lime-500 flex-items-center mx-90 h-20 py-4 text-gray-800 rounded-2xl">
-            <h1 className=""> Calculate Your ROI </h1>
-
-
+          <div className="text-5xl text-center font-bold flex items-center mx-90 h-20 py-4 text-gray-800 rounded-2xl">
+            <h1 className="ml-18"> Calculate Your ROI </h1>
           </div>
-          <div className="flex flex-col xl:flex-row gap-0 xl:gap-8 p-6 lg:p-8 xl:p-10">
-  {/* Left Panel: Sliders and Robot Plans */}
-  <div className="flex-1 xl:w-1/2 bg-white rounded-lg shadow-lg p-8 lg:p-10">
-    {/* Sliders */}
-    <div className="space-y- print:hidden">
-      <Slider label="Fully burdened labor rate (hourly)" min={10} max={100} step={0.5} value={laborRate} setValue={setLaborRate} prefix="$" />
-      <Slider label="Personnel per cleaning" min={1} max={10} step={0.5} value={personnel} setValue={setPersonnel} />
-      <Slider label="Hours per cleaning" min={1} max={10} step={0.5} value={hours} setValue={setHours} suffix=" hrs" />
-      <Slider label="Cleanings per week" min={1} max={14} step={0.5} value={frequency} setValue={setFrequency} />
-      <Slider label="Number of courts" min={1} max={30} step={0.5} value={courts} setValue={setCourts} />
-    </div>
 
-    {/* Robot Plan Selection */}
-    <div className="mt-12">
-      <label className="block font-semibold mb-4 text-2xl">Robot 3-year lease plan</label>
-      <div className="flex flex-col gap-4">
-        {[799, 899, 999].map((cost) => (
-          <div key={cost} className="relative">
-            <div 
-              className={`border-2 rounded-lg p-4 cursor-pointer transition-all ${
-                robotCost === cost ? `border-${cost === 799 ? 'green' : cost === 899 ? 'purple' : 'blue'}-500 bg-${cost === 799 ? 'green' : cost === 899 ? 'purple' : 'blue'}-50` : 'border-gray-300'
-              }`}
-              onClick={() => {
-                handleRobotPlanChange(cost);
-                toggleDropdown(cost);
-              }}
-            >
-              <div className="flex items-center justify-between">
-                <div className="flex items-center">
+          <div className="bg-white rounded-lg p-6 shadow-md mb-6 flex flex-col items-center">
+            <h1 className="text-3xl font-bold mb-5"> Enter Information </h1>
+            <form className="flex flex-col gap-6 w-full max-w-md">
+              <div className="flex flex-col gap-3">
+                <div className="flex items-center gap-3">
+                  <label
+                    className="w-32 text-lg font-semibold"
+                    htmlFor="firstName"
+                  >
+                    First Name
+                  </label>
                   <input
-                    type="radio"
-                    name="robotCost"
-                    value={cost}
-                    checked={robotCost === cost}
-                    onChange={() => handleRobotPlanChange(cost)}
-                    className="form-radio h-5 w-5 mr-3"
+                    id="firstName"
+                    type="text"
+                    placeholder=""
+                    className="flex-1 border border-gray-300 rounded px-4 py-2 text-lg focus:outline-none"
                   />
-                  <span className="text-xl font-semibold">${cost}/Month Plan</span>
                 </div>
-                {activeDropdown === cost ? <FaChevronUp /> : <FaChevronDown />}
+                <div className="flex items-center gap-3">
+                  <label
+                    className="w-32 text-lg font-semibold "
+                    htmlFor="lastName"
+                  >
+                    Last Name
+                  </label>
+                  <input
+                    id="lastName"
+                    type="text"
+                    placeholder=""
+                    className="flex-1 border border-gray-300 rounded px-4 py-2 text-lg focus:outline-none"
+                  />
+                </div>
+                <div className="flex items-center gap-3">
+                  <label className="w-32 text-lg font-semibold" htmlFor="email">
+                    Email
+                  </label>
+                  <input
+                    id="email"
+                    type="email"
+                    placeholder=""
+                    className="flex-1 border border-gray-300 rounded px-4 py-2 text-lg focus:outline-none"
+                  />
+                </div>
+                <div className="flex items-center gap-3">
+                  <label
+                    className="w-32 text-lg font-semibold"
+                    htmlFor="company"
+                  >
+                    Company
+                  </label>
+                  <input
+                    id="company"
+                    type="text"
+                    placeholder=""
+                    className="flex-1 border border-gray-300 rounded px-4 py-2 text-lg focus:outline-none"
+                  />
+                </div>
               </div>
-              {activeDropdown === cost && (
-                <div className="mt-4 pl-8 border-t pt-4">
-                  {planFeatures[cost].map((feature, index) => (
-                    <div key={index} className="flex items-center mb-2">
-                      <FaCheckCircle className="text-green-600 mr-2 w-4 h-4" />
-                      <span className="text-sm text-gray-600">{feature.name}</span>
+              <h2 className="text-3xl font-semibold text-gray-800 mb-4">
+                What is your main reason for using this ROI calculator?
+              </h2>
+              <div className="flex flex-col gap-3">
+  {reasons.map((reason, index) => (
+    <label key={index} className="flex items-center gap-3">
+      <input
+        type="checkbox"
+        name="roiReasons"
+        value={reason}
+        checked={selectedReasons.includes(reason)}
+        onChange={(e) => {
+          const value = e.target.value;
+          if (e.target.checked) {
+            setSelectedReasons([...selectedReasons, value]);
+          } else {
+            setSelectedReasons(selectedReasons.filter((r) => r !== value));
+          }
+        }}
+        className="form-checkbox h-5 w-5 text-green-600"
+      />
+      <span className="font-bold text-lg text-gray-700">{reason}</span>
+    </label>
+  ))}
+
+  {selectedReasons.includes("Other") && (
+    <input
+      type="text"
+      placeholder=""
+      value={otherReason}
+      onChange={(e) => setOtherReason(e.target.value)}
+      className="mt-2 border border-gray-300 rounded px-4 py-2 text-lg focus:outline-none"
+    />
+  )}
+</div>
+            </form>
+          </div>
+          <div className="flex flex-col xl:flex-row gap-0 xl:gap-8 p-6 lg:p-8 xl:p-10 pt-3">
+            {/* Left Panel: Sliders and Robot Plans */}
+            <div className="flex-1 xl:w-1/2 bg-white rounded-lg shadow-lg p-8 lg:p-10">
+              <p className="text-center text-2xl font-bold pb-5">
+                {" "}
+                Select Your Cleaning Process
+              </p>
+
+              <div className="flex justify-center items-center">
+                <div className="">
+                <h1 className="mr-2 font-bold"> Cleaning Model: </h1>
+                <p className="text-xs"> Hover over the buttons for more details </p>
+                </div>
+                <button
+                  className="whitespace-nowrap mr-7 text-xl font-bold bg-lime-400 hover:bg-lime-500 transition duration-200 ease-in-out rounded-3xl px-4 py-2 cursor-pointer"
+                  onClick={() => inHouseRoi()}
+                  title="assumes a weekly labor cost of $5000 and no monthly costs and hourly rate"
+                >
+                  In-House
+                </button>
+                 <button
+                  className="mr-7 text-xl font-bold bg-lime-400 hover:bg-lime-500 transition duration-200 ease-in-out rounded-3xl px-4 py-2 cursor-pointer"
+                  onClick={() => contractRoi()}
+                  title="assumes a monthly labor cost of $3500 and no hourly rate or weekly costs"
+                >
+                  Contract
+                </button>
+                 <button
+                  className="mr-7 text-xl font-bold bg-lime-400 hover:bg-lime-500 transition duration-200 ease-in-out rounded-3xl px-4 py-2 cursor-pointer"
+                  onClick={() => ownerRoi()}
+                  title="assumes no monthly or weekly costs and no hourly rate"
+                > 
+                  Owner
+                </button>
+              </div>
+              {/* Sliders */}
+              <div className="space-y- print:hidden pt-8">
+    <Slider
+    label="Number of clubs"
+    min={0}
+    max={50}
+    step={1}
+    value={numClub}
+    setValue={setClub}
+  />
+  <Slider
+    label="Number of courts per club"
+    min={1}
+    max={50}
+    step={1}
+    value={courts}
+    setValue={setCourts}
+  />
+  <Slider
+    label="Hourly labor rate"
+    min={0}
+    max={100}
+    step={0.5}
+    value={laborRate}
+    setValue={setLaborRate}
+    prefix="$"
+    description="Use when monthly and weekly costs are unknown"
+  />
+  <Slider
+    label="Estimated weekly labor cost"
+    min={0}
+    max={10000}
+    step={500}
+    value={weeklyRate}
+    setValue={setWeeklyRate}
+    prefix="$"
+    description="Use when monthly costs and hourly rates are unknown"
+  />
+  <Slider
+    label="Estimated monthly labor cost"
+    min={0}
+    max={10000}
+    step={1000}
+    value={monthlyRate}
+    setValue={setMonthlyRate}
+    prefix="$"
+    description="Use when weekly costs and hourly rates are unknown"
+  />
+            <hr className="my-6 border-t mt-10 border-gray-300" />
+              </div>
+
+              {/* Robot Plan Selection */}
+              <div className="mt-12">
+                <label className="block font-semibold mb-4 text-2xl">
+                  Select Your Automation Plan
+                </label>
+                <div className="flex flex-col gap-4">
+                  {[899, 999, 1199].map((cost) => (
+                    <div key={cost} className="relative">
+                      <div
+                        className={`border-2 rounded-lg p-4 cursor-pointer transition-all ${
+                          robotCost === cost
+                            ? `border-${
+                                cost === 899
+                                  ? "green"
+                                  : cost === 999
+                                  ? "purple"
+                                  : "blue"
+                              }-500 bg-${
+                                cost === 899
+                                  ? "green"
+                                  : cost === 999
+                                  ? "purple"
+                                  : "blue"
+                              }-50`
+                            : "border-gray-300"
+                        }`}
+                        onClick={() => {
+                          handleRobotPlanChange(cost);
+                          toggleDropdown(cost);
+                        }}
+                      >
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center">
+                            <input
+                              type="radio"
+                              name="robotCost"
+                              value={cost}
+                              checked={robotCost === cost}
+                              onChange={() => handleRobotPlanChange(cost)}
+                              className="form-radio h-5 w-5 mr-3"
+                            />
+                            <span className="text-xl font-semibold">
+                              ${cost}/Month Plan
+                            </span>
+                          </div>
+                          {activeDropdown === cost ? (
+                            <FaChevronUp />
+                          ) : (
+                            <FaChevronDown />
+                          )}
+                        </div>
+                        {activeDropdown === cost && (
+                          <div className="mt-4 pl-8 border-t pt-4">
+                            {planFeatures[cost].map((feature, index) => (
+                              <div
+                                key={index}
+                                className="flex items-center mb-2"
+                              >
+                                <FaCheckCircle className="text-green-600 mr-2 w-4 h-4" />
+                                <span className="text-sm text-gray-600">
+                                  {feature.name}
+                                </span>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </div>
                     </div>
                   ))}
+                  <div className="flex justify-center align-center">
+                    <button
+                      onClick={() => window.print()}
+                      className="bg-green-900 text-white rounded-xl brightness-150 w-50 h-10 text-xl hover:bg-green-800 transition-all"
+                    >
+                      Save Results As PDF
+                    </button>
+                  </div>
                 </div>
-              )}
+                <div className="bg-white rounded-lg shadow-lg p-8 lg:p-10">
+</div>
+
+              </div>
+            </div>
+
+            {/* Right Panel: Results and Graphs split vertically */}
+            <div className="flex-1 xl:w-1/2 flex flex-col gap-6">
+              {/* Results */}
+            
+
+
+
+              <div className="bg-white rounded-lg shadow-lg p-8 lg:p-10">
+                <p className="text-center text-black mb-6 text-2xl font-bold">
+                  More information
+                </p>
+
+                <div className="space-y-4">
+                  <CollapsibleSection title="Sweeping Information">
+    <Slider
+      label="Sweeping frequency (per week)"
+      min={0}
+      max={10}
+      step={1}
+      value={sweepingFrequency}
+      setValue={setSweepingFrequency}
+    />
+    <Slider
+      label="Sweeping duration for 1 court (minutes)"
+      min={0}
+      max={120}
+      step={15}
+      value={dryCleanHours}
+      setValue={setDryCleanHours}
+    />
+    <Slider
+      label="Sweeping duration for other places (minutes)"
+      min={0}
+      max={120}
+      step={15}
+      value={sweepingOther}
+      setValue={setSweepingOther}
+    />
+  </CollapsibleSection>
+
+  <CollapsibleSection title="Scrubbing Information">
+    <Slider
+      label="Wet cleaning frequency (per week)"
+      min={0}
+      max={10}
+      step={1}
+      value={scrubfrequency}
+      setValue={setScrubFrequency}
+    />
+    <Slider
+      label="Wet cleaning duration for 1 court (minutes)"
+      min={0}
+      max={120}
+      step={15}
+      value={scrubHours}
+      setValue={setScrubHours}
+    />
+    <Slider
+      label="Wet cleaning duration for other places (minutes)"
+      min={0}
+      max={120}
+      step={15}
+      value={scrubbingOther}
+      setValue={setScrubbingOther}
+    />
+  </CollapsibleSection>
+
+  <CollapsibleSection title="Mopping Information">
+    <Slider
+      label="Mopping frequency (per week)"
+      min={0}
+      max={10}
+      step={1}
+      value={mopFrequency}
+      setValue={setMopFrequency}
+    />
+    <Slider
+      label="Mopping duration for 1 court (minutes)"
+      min={0}
+      max={120}
+      step={15}
+      value={mopHours}
+      setValue={setmopHours}
+    />
+    <Slider
+      label="Mopping duration for other places (minutes)"
+      min={0}
+      max={120}
+      step={15}
+      value={moppingOther}
+      setValue={setMoppingOther}
+    />
+  </CollapsibleSection>
+
+  <CollapsibleSection title="Vacuuming Information">
+    <Slider
+      label="Vacuuming frequency (per week)"
+      min={0}
+      max={10}
+      step={1}
+      value={vacuumFrequency}
+      setValue={setVacuumFrequency}
+    />
+    <Slider
+      label="Vacuuming duration for 1 court (minutes)"
+      min={0}
+      max={120}
+      step={15}
+      value={vacuumHours}
+      setValue={setVacuumHours}
+    />
+    <Slider
+      label="Vacuuming duration for other places (minutes)"
+      min={0}
+      max={120}
+      step={15}
+      value={vacuumingOther}
+      setValue={setVacuumingOther}
+    />
+  </CollapsibleSection>
+
+  <CollapsibleSection title="Other Tasks">
+    <Slider
+      label="Frequency of additional cleaning tasks (per week)"
+      min={0}
+      max={20}
+      step={1}
+      value={frequency}
+      setValue={setFrequency}
+    />
+    <Slider
+      label="Time for additional cleaning tasks (minutes)"
+      min={0}
+      max={240}
+      step={15}
+      value={otherHours}
+      setValue={setOtherHours}
+      description="(e.g. Taking out the trash)"
+    />
+  </CollapsibleSection>
+                  
+                </div>
+              </div>
             </div>
           </div>
-        ))}
-        <div className="flex justify-center align-center">
-          <button
-            onClick={() => window.print()}
-            className="bg-green-900 text-white rounded-xl brightness-150 w-50 h-10 text-xl hover:bg-green-800 transition-all"
-          >
-            Print page
-          </button>
-        </div>
-      </div>
-    </div>
+          <div className="bg-white rounded-lg shadow-lg p-8 lg:p-10 w-full">
+  <p className="text-center text-black mb-6 text-2xl font-bold">
+    Estimate your savings with automated court cleaning
+  </p>
+
+  <div className="w-full">
+    <table className="w-full border-collapse border border-gray-300 text-center">
+      <thead>
+        <tr className="bg-gray-100">
+          <th className="border border-gray-300 p-6 text-lg w-1/3"></th>
+          <th className="border border-gray-300 p-6 text-lg w-1/3">Monthly</th>
+          <th className="border border-gray-300 p-6 text-lg w-1/3">Yearly</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td className="border border-gray-300 p-6 font-bold text-xl">Current Costs</td>
+          <td className="border border-gray-300 p-6 text-red-600 font-bold text-xl">{formatCurrency(currentMonthlyCost)}</td>
+          <td className="border border-gray-300 p-6 text-red-600 font-bold text-xl">{formatCurrency(currentAnnualCost)}</td>
+        </tr>
+        <tr>
+          <td className="border border-gray-300 p-6 font-bold text-xl">Estimated Savings</td>
+          <td className="border border-gray-300 p-6 text-green-700 font-bold text-xl">{formatCurrency(monthlySavings)}</td>
+          <td className="border border-gray-300 p-6 text-green-700 font-bold text-xl">{formatCurrency(annualSavings)}</td>
+        </tr>
+        <tr>
+  <td className="border border-gray-300 p-6 font-bold text-xl">Time Spent</td>
+  <td className="border border-gray-300 p-6 text-red-600 font-bold text-xl">{monthlyTimeSpent.toFixed(1)} hrs</td>
+  <td className="border border-gray-300 p-6 text-red-600 font-bold text-xl">{yearlyTimeSpent.toFixed(1)} hrs</td>
+</tr>
+        <tr>
+          <td className="border border-gray-300 p-6 font-bold text-xl">Time Saved</td>
+          <td className="border border-gray-300 p-6 text-green-700 font-bold text-xl">{monthlyTimeSaved.toFixed(1)} hrs</td>
+          <td className="border border-gray-300 p-6 text-green-700 font-bold text-xl">{yearlyTimeSaved.toFixed(1)} hrs</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  <div className="bg-white rounded-lg shadow-lg p-8 lg:p-10 w-full mt-8">
+</div>
+</div>
+<div className="bg-white rounded-lg shadow-lg p-8 lg:p-10 w-full mt-8">
+  <div className="flex justify-center gap-4 mb-6">
+    <button
+      onClick={() => setChartView("monthly")}
+      className={`px-6 py-2 rounded-xl font-bold transition-all ${
+        chartView === "monthly"
+          ? "bg-green-700 text-white shadow-md"
+          : "bg-gray-200 text-gray-700 hover:bg-gray-300"
+      }`}
+    >
+      Monthly
+    </button>
+
+    <button
+      onClick={() => setChartView("annual")}
+      className={`px-6 py-2 rounded-xl font-bold transition-all ${
+        chartView === "annual"
+          ? "bg-green-700 text-white shadow-md"
+          : "bg-gray-200 text-gray-700 hover:bg-gray-300"
+      }`}
+    >
+      Annual
+    </button>
   </div>
 
-  {/* Right Panel: Results and Graphs split vertically */}
-  <div className="flex-1 xl:w-1/2 flex flex-col gap-6">
-    {/* Results */}
-    <div className="bg-white rounded-lg shadow-lg p-8 lg:p-10">
-      <p className="text-center text-black mb-6 text-2xl font-bold">Estimate your savings with automated court cleaning</p>
+  {chartView === "monthly" && (
+  <ResponsiveContainer width="100%" height={300}>
+    <BarChart data={data}>
+      <XAxis dataKey="name" />
+      <YAxis 
+       tickFormatter={(value) =>
+    `$${value.toLocaleString(undefined, { maximumFractionDigits: 0 })}`
+}
+      />
+      <Tooltip />
+      <Bar dataKey="value">
+        {data.map((entry, index) => {
+          let color = "#FF6384"; // Default bright red for costs
+          if (entry.name === "Savings") color = "#82ca9d"; // green
+          return <Cell key={`cell-${index}`} fill={color} />;
+        })}
+      </Bar>
+    </BarChart>
+  </ResponsiveContainer>
+)}
 
-      <div className="space-y-4">
-        <div className="bg-gray-100 p-6 rounded-lg flex justify-between items-center">
-          <p className="text-2xl text-gray-600 font-bold">Current Costs (Monthly):</p>
-          <div className="text-4xl font-bold text-red-600">{formatCurrency(currentMonthlyCost)}</div>
-        </div>
-        <div className="bg-gray-100 p-6 rounded-lg flex justify-between items-center">
-          <p className="text-2xl text-gray-600 font-bold">Current Costs (Annual):</p>
-          <div className="text-4xl font-bold text-red-600">{formatCurrency(currentAnnualCost)}</div>
-        </div>
-        <div className="bg-gray-100 p-6 rounded-lg flex justify-between items-center">
-          <p className="text-2xl text-gray-600 font-bold">Estimated Savings (Monthly):</p>
-          <div className="text-4xl font-bold text-green-700">{formatCurrency(monthlySavings)}</div>
-        </div>
-        <div className="bg-gray-100 p-6 rounded-lg flex justify-between items-center">
-          <p className="text-2xl text-gray-600 font-bold">Estimated Savings (Annually):</p>
-          <div className="text-4xl font-bold text-green-700">{formatCurrency(annualSavings)}</div>
-        </div>
-        <div className="bg-gray-100 p-6 rounded-lg flex justify-between items-center">
-          <p className="text-2xl text-gray-600 font-bold">Time Saved (Monthly):</p>
-          <div className="text-4xl font-bold text-green-700">{(hours * frequency * 4 / 2).toFixed(1)} hrs</div> 
-        </div>
-      </div>
-    </div>
+{chartView === "annual" && (
+  <ResponsiveContainer width="100%" height={300}>
+    <BarChart data={Annualdata}>
+      <XAxis dataKey="name" />
+      <YAxis  tickFormatter={(value) =>
+    `$${value.toLocaleString(undefined, { maximumFractionDigits: 0 })}`
+}/>
+      <Tooltip />
+      <Bar dataKey="value">
+        {Annualdata.map((entry, index) => {
+          let color = "#FF6384"; // bright red for both cost categories
+          if (entry.name === "Savings") color = "#82ca9d"; // green
+          return <Cell key={`cell-${index}`} fill={color} />;
+        })}
+      </Bar>
+    </BarChart>
+  </ResponsiveContainer>
+)}
 
-    {/* Graphs */}
-    <div className="bg-white rounded-lg shadow-lg p-8 lg:p-10">
-      <h3 className="text-center font-bold text-xl mb-4">Current Costs vs. CECE Costs and Savings (Monthly)</h3>
-      <ResponsiveContainer width="100%" height={300}>
-        <BarChart data={data}>
-          <XAxis dataKey="name" fontSize={14} interval={0} angle={-45} textAnchor="end" height={80} />
-          <YAxis fontSize={14}>
-            <Label value="USD ($)" angle={-90} position="insideLeft" />
-          </YAxis>
-          <Tooltip />
-          <Bar dataKey="value">
-            {data.map((entry, index) => <Cell key={`cell-${index}`} fill={colors[index % colors.length] || "#ccc"} />)}
-          </Bar>
-        </BarChart>
-      </ResponsiveContainer>
+<hr className="my-6 border-t border-gray-300" />
+              <CleaningCalendar
+              sweepingFrequency={sweepingFrequency}
+              scrubFrequency={scrubfrequency}
+              mopFrequency={mopFrequency}
+              vacuumFrequency={vacuumFrequency}
+              dryCleanHours={dryCleanHours}
+              scrubHours={scrubHours}
+              mopHours={mopHours}
+              vacuumHours={vacuumHours}
+              numClub={numClub}
+              courts={courts}
+            />
+</div>
 
-      <h3 className="text-center font-bold text-xl mt-10 mb-4">Current Costs vs. CECE Costs and Savings (Annually)</h3>
-      <ResponsiveContainer width="100%" height={300}>
-        <BarChart data={Annualdata}>
-          <XAxis dataKey="name" fontSize={14} interval={0} angle={-45} textAnchor="end" height={80} />
-          <YAxis fontSize={14}>
-            <Label value="USD ($)" angle={-90} position="insideLeft" />
-          </YAxis>
-          <Tooltip />
-          <Bar dataKey="value">
-            {Annualdata.map((entry, index) => <Cell key={`cell-a-${index}`} fill={colors[index % colors.length] || "#ccc"} />)}
-          </Bar>
-        </BarChart>
-      </ResponsiveContainer>
-    </div>
-  </div>
-</div>   
+ <ResponsiveContainer width="100%" height={300}>
+  <LineChart data={monthlyComparisonData}>
+    <CartesianGrid strokeDasharray="3 3" />
+    <XAxis dataKey="month" />
+    <YAxis tickFormatter={(v) => `$${v.toLocaleString()}`} />
+    <Tooltip formatter={(v) => `$${v.toLocaleString()}`} />
+    <Legend />
+
+    <Line type="monotone" dataKey="oldMonthlyCost" stroke="#ff0000" strokeWidth={3} dot={false} />
+    <Line type="monotone" dataKey="newMonthlyCost" stroke="#007bff" strokeWidth={3} dot={false} />
+
+    <defs>
+      <linearGradient id="areaFill" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stopColor="green" stopOpacity={0.4}/>
+        <stop offset="100%" stopColor="red" stopOpacity={0.4}/>
+      </linearGradient>
+    </defs>
+
+    <Area 
+      type="monotone"
+      dataKey="diff"
+      stroke="none"
+      fill="url(#areaFill)"
+      baseValue={0}
+      isAnimationActive={false}
+    />
+  </LineChart>
+</ResponsiveContainer>
+
         </div>
       </main>
+                      
     </>
   );
 }
@@ -285,6 +869,7 @@ function Slider({
   setValue,
   prefix = "",
   suffix = "",
+  description = "",
 }) {
   const [inputValue, setInputValue] = useState(value.toString());
 
@@ -295,7 +880,7 @@ function Slider({
   const handleInputChange = (e) => {
     const val = e.target.value;
     setInputValue(val);
-    
+
     // Only update the actual value if it's a valid number
     const parsed = parseFloat(val);
     if (!isNaN(parsed)) {
@@ -325,12 +910,12 @@ function Slider({
 
   const handleKeyDown = (e) => {
     // Handle arrow key increments/decrements
-    if (e.key === 'ArrowUp') {
+    if (e.key === "ArrowUp") {
       e.preventDefault();
       const newValue = Math.min(max, value + step);
       setValue(newValue);
       setInputValue(newValue.toString());
-    } else if (e.key === 'ArrowDown') {
+    } else if (e.key === "ArrowDown") {
       e.preventDefault();
       const newValue = Math.max(min, value - step);
       setValue(newValue);
@@ -340,9 +925,10 @@ function Slider({
 
   return (
     <div className="mb-6">
-      <label className="block font-semibold mb-3 text-2xl">
-        {label}
-      </label>
+      <label className="block font-semibold mb-3 text-2xl">{label}</label>
+      {description && (
+        <p className="text-lg text-gray-500 mb-2">{description}</p>
+      )}
       <input
         type="range"
         min={min}
@@ -372,4 +958,131 @@ function Slider({
   );
 }
 
+function formatTimeRange(startMinutes, duration) {
+  const pad = (n) => n.toString().padStart(2, "0");
+  const startHour = Math.floor(startMinutes / 60);
+  const startMin = startMinutes % 60;
+  const endMinutes = startMinutes + duration;
+  const endHour = Math.floor(endMinutes / 60);
+  const endMin = endMinutes % 60;
 
+  const to12 = (h) => ((h + 11) % 12) + 1;
+  const ampm = (h) => (h < 12 || h === 24 ? "am" : "pm");
+
+  const startStr = `${to12(startHour)}:${pad(startMin)}${ampm(startHour)}`;
+  const endStr = `${to12(endHour)}:${pad(endMin)}${ampm(endHour)}`;
+  return `${startStr} to ${endStr}`;
+}
+
+function CleaningCalendar({
+  sweepingFrequency,
+  scrubFrequency,
+  mopFrequency,
+  vacuumFrequency,
+  dryCleanHours,
+  scrubHours,
+  mopHours,
+  vacuumHours,
+}) {
+  const days = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+
+  function getCleaningDays(freq) {
+    if (freq <= 0) return [];
+    if (freq >= 7) return days.map((_, idx) => idx);
+    const interval = Math.floor(7 / freq);
+    return [...Array(freq)].map((_, i) => (i * interval) % 7);
+  }
+
+  // Dynamic time calculation
+  let currentTime = 8 * 60; // start at 8:00 am
+
+  const schedule = [
+    {
+      label: "Sweep",
+      colorClass: "bg-orange-500",
+      activeDays: getCleaningDays(sweepingFrequency),
+      duration: dryCleanHours,
+    },
+    {
+      label: "Scrub",
+      colorClass: "bg-blue-500",
+      activeDays: getCleaningDays(scrubFrequency),
+      duration: scrubHours,
+    },
+    {
+      label: "Mop",
+      colorClass: "bg-yellow-400",
+      activeDays: getCleaningDays(mopFrequency),
+      duration: mopHours,
+    },
+    {
+      label: "Vacuum",
+      colorClass: "bg-green-500",
+      activeDays: getCleaningDays(vacuumFrequency),
+      duration: vacuumHours,
+    },
+  ].map((task) => {
+    const start = currentTime;
+    const end = currentTime + task.duration;
+    const timeRange = formatTimeRange(start, task.duration);
+    currentTime = end;
+    return { ...task, timeRange };
+  });
+
+  return (
+    <div className="my-12 px-2 md:px-6">
+      <h3 className="text-2xl font-bold mb-6 text-center">
+        Your Automated Cleaning Schedule
+      </h3>
+
+      {/* Days Header */}
+      <div className="grid grid-cols-8 gap-2 mb-2 text-center text-lg font-semibold text-gray-700">
+        <div className="text-right pr-2"></div>
+        {days.map((day) => (
+          <div key={day}>{day}</div>
+        ))}
+      </div>
+
+      {/* Task Rows */}
+      {schedule.map((row, i) => (
+        <div key={i} className="grid grid-cols-8 gap-2 mb-2 items-center">
+          <div className="text-right pr-3 font-semibold text-sm text-gray-700">
+            {row.timeRange}
+          </div>
+          {days.map((_, idx) => (
+            <div
+              key={idx}
+              className={`rounded-lg h-14 flex items-center justify-center transition-all
+                ${row.activeDays.includes(idx)
+                  ? `${row.colorClass}`
+                  : "bg-gray-200"}`}
+            />
+          ))}
+        </div>
+      ))}
+
+      {/* Legend */}
+      <div className="mt-6 flex flex-wrap justify-center gap-4 text-sm font-medium">
+        <div className="flex items-center gap-2">
+          <div className="w-4 h-4 bg-orange-500 rounded"></div>
+          Sweep
+        </div>
+        <div className="flex items-center gap-2">
+          <div className="w-4 h-4 bg-blue-500 rounded"></div>
+          Scrub
+        </div>
+        <div className="flex items-center gap-2">
+          <div className="w-4 h-4 bg-yellow-400 rounded"></div>
+          Mop
+        </div>
+        <div className="flex items-center gap-2">
+          <div className="w-4 h-4 bg-green-500 rounded"></div>
+          Vacuum
+        </div>
+      </div>
+    </div>
+  );
+}
+
+
+export { Slider, CleaningCalendar };
